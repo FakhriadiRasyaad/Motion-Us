@@ -8,7 +8,7 @@ const hideAll = () => { $("#err").style.display = "none"; $("#ok").style.display
     const { data: { session } } = await window.sb.auth.getSession();
     if (session) {
         // ✅ FIX 1: Pakai absolute path dengan '/'
-        window.location.href = '/Motion-Us.html';
+        window.location.href = '/Motion-US.html';
     }
 })();
 
@@ -45,7 +45,7 @@ $("#f").addEventListener("submit", async (e) => {
 
         // ✅ FIX 2: Pakai absolute path dengan '/' dan case yang benar
         setTimeout(() => {
-            window.location.href = '/Motion-Us.html';
+            window.location.href = '/Motion-US.html';
         }, 500);
 
     } catch (error) {
