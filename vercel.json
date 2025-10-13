@@ -1,6 +1,14 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
+  "rewrites": [
+    {
+      "source": "/Motion-US",
+      "destination": "/Motion-US.html"
+    },
+    {
+      "source": "/Motion-US/(.*)",
+      "destination": "/Motion-US/$1"
+    }
   ]
 }
