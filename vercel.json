@@ -1,14 +1,51 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/Motion-US",
-      "destination": "/Motion-US.html"
+      "source": "/",
+      "destination": "/index.html"
     },
     {
-      "source": "/Motion-US/(.*)",
-      "destination": "/Motion-US/$1"
+      "source": "/dashboard",
+      "destination": "/Motion-Us.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/About.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/Contact.html"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/Pricing.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/photo",
+      "destination": "/Motion-Us/Photo.html"
+    },
+    {
+      "source": "/video",
+      "destination": "/Motion-Us/Video.html"
+    },
+    {
+      "source": "/payment",
+      "destination": "/Pricing/Pembayaran.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ]
 }
