@@ -2,9 +2,5 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    {
-      "source": "/Motion-Us.html",
-      "destination": "/Motion-Us.html"
-    }
-  ]
+
 }
