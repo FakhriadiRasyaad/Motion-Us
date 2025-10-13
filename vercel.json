@@ -1,6 +1,10 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/Motion-Us",
+      "destination": "/Motion-Us.html"
+    }
   ]
 }
