@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Login | Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    body{margin:0;background:#0b1020;color:#eef2ff;font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{min-height:100svh;display:grid;place-items:center;padding:24px}
+    .card{width:100%;max-width:420px;background:#0f172a;border:1px solid #1f2536;border-radius:16px;overflow:hidden}
+    header{padding:20px 24px;border-bottom:1px solid #1f2536;display:flex;align-items:center;gap:10px}
+    main{padding:20px 24px}
+    label{display:block;margin:0 0 6px 4px;color:#cbd5e1}
+    input{width:100%;padding:12px 14px;border-radius:12px;background:#111827;border:1px solid #1f2937;color:#e5e7eb}
+    input:focus{outline:none;border-color:#334155;box-shadow:0 0 0 3px rgba(37,99,235,.25)}
+    .row{display:grid;gap:14px;margin-bottom:14px}
+    .btn{width:100%;padding:12px 16px;border:0;border-radius:12px;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;font-weight:600;cursor:pointer}
+    .err,.ok{display:none;margin-bottom:12px;padding:10px 12px;border-radius:12px}
+    .err{background:#7f1d1d;border:1px solid #ef4444;color:#fee2e2}
+    .ok{background:#052e16;border:1px solid #22c55e;color:#dcfce7}
+  </style>
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../assets/js/config.js";
+    window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, storage: localStorage, autoRefreshToken: true }
+    });
+  </script>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" aria-labelledby="t">
+    <header>
+      <img src="../assets/img/logo.png" alt="logo" width="32" height="32" />
+      <h1 id="t" style="margin:0;font-size:18px">Admin Login</h1>
+    </header>
+    <main>
+      <div id="err" class="err"></div>
+      <div id="ok" class="ok"></div>
+
+      <form id="f">
+        <div class="row">
+          <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" required />
+          </div>
+          <div>
+            <label for="pw">Kata sandi</label>
+            <input id="pw" type="password" minlength="6" required />
+          </div>
+        </div>
+        <button class="btn" type="submit">Masuk sebagai Admin</button>
+      </form>
+    </main>
+  </section>
+</div>
+
+<script type="module">
+  const $ = s=>document.querySelector(s);
+  const show = (el,txt)=>{ el.textContent=txt; el.style.display='block'; };
+  const hide = ()=>{ $('#err').style.display='none'; $('#ok').style.display='none'; };
+
+  async function ensureSelfProfile() {
+    try { await window.sb.rpc('ensure_self_profile'); } catch(e) { /* ignore */ }
+  }
+
+  // Jika sudah login & admin → redirect
+  (async ()=>{
+    const { data:{ session } } = await window.sb.auth.getSession();
+    if (!session) return;
+    await ensureSelfProfile();
+    const { data: prof } = await window.sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+    if (prof?.role === 'admin' || prof?.role === 'superadmin') location.replace('./homepage.html');
+  })();
+
+  // Login handler
+  $('#f').addEventListener('submit', async (e)=>{
+    e.preventDefault(); hide();
+    const email = $('#email').value.trim();
+    const password = $('#pw').value;
+
+    const { data, error } = await window.sb.auth.signInWithPassword({ email, password });
+    if (error) return show($('#err'), error.message || 'Gagal masuk');
+
+    await ensureSelfProfile();
+    const { data: prof, error: pErr } = await window.sb
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (pErr) {
+      console.error(pErr);
+      return show($('#err'), (pErr.message || 'Gagal cek role') + ' — periksa RLS/policy tabel profiles.');
+    }
+    if (prof?.role !== 'admin' && prof?.role !== 'superadmin') {
+      await window.sb.auth.signOut({ scope:'local' });
+      return show($('#err'), 'Akses ditolak: bukan admin/superadmin.');
+    }
+
+    show($('#ok'), 'Berhasil. Mengalihkan…');
+    location.replace('./homepage.html');
+  });
+</script>
+</body>
+</html>

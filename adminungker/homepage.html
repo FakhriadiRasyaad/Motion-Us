@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Dashboard | Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    body{margin:0;background:#0b1020;color:#eef2ff;font-family:system-ui,Segoe UI,Roboto,Arial}
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1f2536;background:#0f172a}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{background:#0f172a;border:1px solid #1f2536;border-radius:10px;padding:8px 10px}
+    .wrap{padding:18px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    input,select,button{font:inherit}
+    .input{padding:10px 12px;border-radius:10px;background:#ffffff;border:1px solid #1f2937;color:#000000}
+    .btn{padding:10px 14px;border-radius:10px;border:0;background:#2563eb;color:#fff;font-weight:600;cursor:pointer}
+    .btn.sec{background:#475569}
+    table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid #1f2536;text-align:left;vertical-align:top}
+    .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;border:1px solid #334155}
+    .muted{color:#94a3b8}
+    .link{color:#93c5fd;text-decoration:underline}
+
+    /* Gambar bukti */
+    .thumb{width:92px;height:92px;object-fit:cover;border-radius:10px;border:1px solid #334155;cursor:zoom-in}
+    .viewer{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9999}
+    .viewer.show{display:flex}
+    .viewer img{max-width:90vw;max-height:90vh;border-radius:12px;border:1px solid #334155}
+    .viewer .close{position:absolute;top:14px;right:18px;font-size:28px;line-height:1;background:transparent;border:0;color:#e5e7eb;cursor:pointer}
+
+    /* Input teks untuk check_list */
+    .note-input{
+      width:100%;
+      max-width:260px;
+      padding:8px 10px;
+      border-radius:10px;
+      background:#0f172a;
+      border:1px solid #1f2937;
+      color:#e5e7eb;
+    }
+    .note-saving{opacity:.6}
+
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;border:1px solid #1f2937;padding:10px 12px;border-radius:10px;color:#e5e7eb;display:none}
+    .toast.show{display:block}
+  </style>
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../assets/js/config.js";
+    window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, storage: localStorage, autoRefreshToken: true }
+    });
+  </script>
+</head>
+<body>
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="../assets/img/logo.png" alt="logo" width="28" height="28" />
+      <strong>Admin Dashboard</strong>
+      <span id="roleBadge" class="badge"></span>
+    </div>
+    <div class="stats">
+      <div class="stat">Total User: <strong id="statUsers">0</strong></div>
+      <div class="stat">Total Tokens: <strong id="statTokens">0</strong></div>
+      <div class="stat">Pending Payments: <strong id="statPending">0</strong></div>
+    </div>
+    <div>
+      <button id="btnLogout" class="btn sec">Logout</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toolbar">
+      <button id="tabUsers" class="btn sec">Users</button>
+      <button id="tabPays"  class="btn">Payments</button>
+      <input id="q" class="input" placeholder="Cari nama/email…" />
+      <button id="btnReload" class="btn">Muat ulang</button>
+    </div>
+
+    <!-- USERS TABLE -->
+    <table id="tblUsers">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nama</th>
+          <th>Role</th>
+          <th>Tokens</th>
+          <th>+Token</th>
+          <th>Set Role</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyUsers">
+        <tr><td colspan="6">Memuat…</td></tr>
+      </tbody>
+    </table>
+
+    <!-- PAYMENTS TABLE -->
+    <table id="tblPays" style="display:none">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>User</th>
+          <th>Metode</th>
+          <th>Kode Redeem</th>  <!-- kembali ke Nominal -->
+          <th>Status</th>
+          <th>Bukti</th>
+          <th style="width:120px">Checklist</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyPays">
+        <tr><td colspan="7">Memuat…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Image viewer -->
+  <div id="viewer" class="viewer" aria-hidden="true">
+    <img id="viewerImg" alt="Bukti pembayaran" />
+    <button id="viewerClose" class="close" aria-label="Tutup">×</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script type="module">
+  const $ = s=>document.querySelector(s);
+  const PROOF_BUCKET = 'payment_proofs';
+
+  function showToast(msg, ms=1400){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window.__toast);
+    window.__toast = setTimeout(()=>t.classList.remove('show'), ms);
+  }
+
+  // debounce helper untuk auto-save input teks
+  function debounce(fn, wait=600){
+    let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait); };
+  }
+
+  async function requireAdmin() {
+    const { data:{ session } } = await window.sb.auth.getSession();
+    if (!session) { location.replace('./login.html'); return null; }
+    try { await window.sb.rpc('ensure_self_profile'); } catch {}
+    const { data: me, error } = await window.sb.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+    if (error || !(me?.role === 'admin' || me?.role === 'superadmin')) {
+      await window.sb.auth.signOut({ scope:'local' });
+      location.replace('./login.html');
+      return null;
+    }
+    $('#roleBadge').textContent = (me.role || '').toUpperCase();
+    return session.user;
+  }
+
+  async function logout() {
+    await window.sb.auth.signOut({ scope:'local' });
+    location.replace('./login.html');
+  }
+
+  // ===== Stats =====
+  async function fetchStats() {
+    const [{ data: users }, { data: pays }] = await Promise.all([
+      window.sb.from('profiles').select('tokens'),
+      window.sb.from('payments').select('id,status')
+    ]);
+    const totalUsers  = users?.length ?? 0;
+    const totalTokens = (users||[]).reduce((a,b)=> a + (b.tokens||0), 0);
+    const pending     = (pays||[]).filter(p=>p.status==='pending').length;
+    return { totalUsers, totalTokens, pending };
+  }
+
+  // ===== Users =====
+  async function listUsers(q='') {
+    let query = window.sb.from('profiles').select('id,email,full_name,role,tokens,created_at').order('created_at',{ascending:false}).limit(500);
+    if (q) query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function renderUsers(rows) {
+    const tbody = $('#tbodyUsers');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6">Tidak ada data</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.email ?? '-'}</td>
+        <td>${r.full_name ?? '-'}</td>
+        <td><span class="badge">${r.role}</span></td>
+        <td><strong>${r.tokens ?? 0}</strong></td>
+        <td style="display:flex;gap:6px;align-items:center">
+          <input type="number" min="1" value="1" id="amt-${r.id}" class="input" style="width:90px" />
+          <button class="btn" data-grant="${r.id}">Tambah</button>
+        </td>
+       
+      </tr>
+    `).join('');
+
+    // <td style="display:flex;gap:6px;align-items:center">
+    //       <select id="role-${r.id}" class="input" style="width:140px">
+    //         <option value="user" ${r.role==='user'?'selected':''}>user</option>
+    //         <option value="admin" ${r.role==='admin'?'selected':''}>admin</option>
+    //         <option value="superadmin" ${r.role==='superadmin'?'selected':''}>superadmin</option>
+    //       </select>
+    //       <button class="btn sec" data-role="${r.id}">Set</button>
+    //     </td>
+
+    tbody.querySelectorAll('[data-grant]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const uid = btn.getAttribute('data-grant');
+        const amt = parseInt(document.getElementById(`amt-${uid}`).value || '0', 10);
+        if (!amt || amt <= 0) return alert('Jumlah token tidak valid');
+        try {
+          const { data: cur } = await window.sb.from('profiles').select('tokens').eq('id', uid).single();
+          const newBal = (cur?.tokens||0) + amt;
+          const { error: upErr } = await window.sb.from('profiles').update({ tokens: newBal }).eq('id', uid);
+          if (upErr) throw upErr;
+          await reloadAll();
+          alert('Token ditambahkan.');
+        } catch(e) { console.error(e); alert('Gagal menambah token: '+(e.message||'')); }
+      });
+    });
+
+    tbody.querySelectorAll('[data-role]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const uid = btn.getAttribute('data-role');
+        const role = document.getElementById(`role-${uid}`).value;
+        try {
+          const { error } = await window.sb.from('profiles').update({ role }).eq('id', uid);
+          if (error) throw error;
+          await reloadAll();
+          alert('Role diperbarui.');
+        } catch(e) { console.error(e); alert('Gagal memperbarui role — cek policy update.'); }
+      });
+    });
+  }
+
+  // ===== Payments =====
+  async function listPayments() {
+    const { data, error } = await window.sb
+      .from('v_payments_with_user')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function signedUrl(path) {
+    if (!path) return { url: null, err: 'proof_url kosong' };
+    try {
+      const { data, error } = await window.sb.storage.from(PROOF_BUCKET).createSignedUrl(path, 3600);
+      if (error) return { url: null, err: error.message || 'signedUrl error' };
+      return { url: data?.signedUrl || null, err: null };
+    } catch(e) {
+      return { url: null, err: e.message || String(e) };
+    }
+  }
+
+  async function renderPayments(rows) {
+    const tbody = $('#tbodyPays');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7">Tidak ada pengajuan</td></tr>'; return; }
+
+    const urlResults = await Promise.all(
+      rows.map(r => r.proof_url ? signedUrl(r.proof_url) : Promise.resolve({url:null,err:'proof_url kosong'}))
+    );
+
+    tbody.innerHTML = rows.map((r,i) => {
+      const { url, err } = urlResults[i] || {};
+      const buktiCell = (() => {
+        if (r.proof_url && url) {
+          return `
+            <img class="thumb" data-src="${r.proof_url}" src="${url}" alt="Bukti" title="Klik untuk perbesar">
+            <div><a class="link" href="${url}" target="_blank">Buka di tab</a></div>
+          `;
+        }
+        if (r.proof_url && !url) {
+          return `<div class="muted">Gagal muat bukti</div><small class="muted">(${err || 'unknown error'})</small>`;
+        }
+        return '-';
+      })();
+
+      const note = (r.check_list ?? '').toString();
+
+      return `
+        <tr>
+          <td>${new Date(r.created_at).toLocaleString('id-ID')}</td>
+          <td>${r.full_name ? `${r.full_name}<br>`:''}<span class="muted">${r.user_email || r.user_id}</span></td>
+          <td>${r.method}</td>
+          <td>${Number(r.amount ?? 0).toLocaleString('id-ID')}</td> <!-- Nominal -->
+          <td>${r.status}</td>
+          <td>${buktiCell}</td>
+          <td>
+            <input type="text" class="note-input" data-pid="${r.id}"
+                   placeholder="Tulis catatan di sini…"
+                   maxlength="200"
+                   value="${note.replaceAll('"','&quot;')}">
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Viewer
+    const viewer = $('#viewer'), viewerImg = $('#viewerImg'), closeBtn = $('#viewerClose');
+    const hideViewer = ()=>{ viewer.classList.remove('show'); viewerImg.src=''; };
+    viewer.addEventListener('click', (e)=>{ if (e.target === viewer) hideViewer(); });
+    closeBtn.addEventListener('click', hideViewer);
+    tbody.querySelectorAll('.thumb').forEach(img=>{
+      img.addEventListener('click', async ()=>{
+        const path = img.getAttribute('data-src');
+        const { url } = await signedUrl(path);
+        viewerImg.src = url || img.getAttribute('src');
+        viewer.classList.add('show');
+      });
+    });
+
+    // Auto-save catatan (debounced on input, langsung on blur)
+    const saveField = async (pid, value, el)=>{
+      el?.classList.add('note-saving');
+      const { error } = await window.sb.from('payments').update({ check_list: value }).eq('id', pid);
+      el?.classList.remove('note-saving');
+      if (error) { showToast('Gagal simpan: ' + error.message); return; }
+      showToast('Tersimpan');
+    };
+    const debounced = debounce(saveField, 600);
+
+    tbody.querySelectorAll('.note-input').forEach(inp=>{
+      const pid = inp.getAttribute('data-pid');
+      inp.addEventListener('input', ()=> debounced(pid, inp.value, inp));
+      inp.addEventListener('blur',  ()=> saveField(pid, inp.value, inp));
+    });
+  }
+
+  // ===== Tabs =====
+  const elTabUsers = $('#tabUsers');
+  const elTabPays  = $('#tabPays');
+  const tblUsers   = $('#tblUsers');
+  const tblPays    = $('#tblPays');
+
+  elTabUsers.onclick = ()=>{ elTabUsers.classList.add('sec'); elTabPays.classList.remove('sec'); tblUsers.style.display=''; tblPays.style.display='none'; };
+  elTabPays.onclick  = ()=>{ elTabPays.classList.add('sec');  elTabUsers.classList.remove('sec'); tblUsers.style.display='none'; tblPays.style.display=''; reloadPays(); };
+
+  // ===== Boot =====
+  const me = await requireAdmin();
+  if (me) {
+    $('#btnLogout').addEventListener('click', logout);
+    $('#btnReload').addEventListener('click', reloadAll);
+    $('#q').addEventListener('input', ()=>{ clearTimeout(window.__t); window.__t=setTimeout(reloadAll,300); });
+    await reloadAll();
+    window.sb.auth.onAuthStateChange((ev)=>{ if (ev === 'SIGNED_OUT') location.replace('./login.html'); });
+  }
+
+  async function reloadAll() {
+    const q = $('#q').value.trim();
+    const [rows, stats] = await Promise.all([listUsers(q), fetchStats()]);
+    await renderUsers(rows);
+    $('#statUsers').textContent   = stats.totalUsers;
+    $('#statTokens').textContent  = stats.totalTokens;
+    $('#statPending').textContent = stats.pending;
+  }
+  async function reloadPays(){ const rows = await listPayments(); await renderPayments(rows); }
+
+
+  
+</script>
+</body>
+</html>

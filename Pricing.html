@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pricing - Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client (window.sb) -->
+  <script type="module" src="assets/js/supabaseClient.js"></script>
+</head>
+<body class="page-pricing">
+
+ <!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <img src="assets/img/logo.png" alt="Logo" class="navbar-logo" />
+    
+    <!-- Hamburger Button (tambahkan ini) -->
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <div class="navbar-links" id="navbarLinks">
+      <a href="Motion-US.html" class="active">Home</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Pricing.html">Pricing</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
+    <button class="btn-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+  <!-- Main -->
+  <main class="hero" style="padding-top:32px">
+    <h1>Pilih Paket Token</h1>
+    <p style="margin-top:6px;color:var(--muted)">Bayar sekali, pakai sesuka hati—tanpa langganan 😄</p>
+
+    <!-- Grid kartu harga – reuse .features + .card dari style.css -->
+    <section class="features" style="margin-top:20px">
+      <a class="card price-card" data-token="1" data-price="5000">
+        <h2>🔹 Paket Murah</h2>
+        <h3>Rp 5.000</h3>
+        <p>1 Token</p>
+      </a>
+
+      <a class="card price-card" data-token="6" data-price="25000">
+        <h2>🔷 Paket Standard</h2>
+        <h3>Rp 25.000</h3>
+        <p>6 Token</p>
+      </a>
+
+      <a class="card price-card" data-token="14" data-price="50000">
+        <h2>💠 Paket Pintar</h2>
+        <h3>Rp 50.000</h3>
+        <p>14 Token</p>
+      </a>
+
+      <a class="card price-card" data-token="30" data-price="100000">
+        <h2>🌟 Paket Sultan</h2>
+        <h3>Rp 100.000</h3>
+        <p>30 Token</p>
+      </a>
+
+      <a class="card price-card" data-token="500" data-price="1000000">
+        <h2>🤝 Paket Start-Up</h2>
+        <h3>Rp 1.000.000</h3>
+        <p>500 Token</p>
+      </a>
+
+      <a class="card price-card" data-token="Unlimited" data-price="3000000">
+        <h2>💼 Business Plan</h2>
+        <h3>Rp 3.000.000</h3>
+        <p>Unlimited token/month</p>
+      </a>
+    </section>
+
+    <p class="text-center" style="margin-top:14px;color:var(--muted);font-size:14px">
+      Semua transaksi aman. Setelah bayar, token otomatis bertambah ke akunmu.
+    </p>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Badge token + navbar helpers (requireAuth, refresh, realtime) -->
+  <script type="module" src="assets/js/badge.js"></script>
+  <!-- Script khusus halaman Pricing -->
+  <script type="module" src="assets/js/pages/pricing.js"></script>
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

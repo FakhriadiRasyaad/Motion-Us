@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contact - Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client (window.sb) -->
+  <script type="module" src="assets/js/supabaseClient.js"></script>
+</head>
+<body class="page-contact">
+
+ <!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <img src="assets/img/logo.png" alt="Logo" class="navbar-logo" />
+    
+    <!-- Hamburger Button (tambahkan ini) -->
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <div class="navbar-links" id="navbarLinks">
+      <a href="Motion-US.html" class="active">Home</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Pricing.html">Pricing</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
+    <button class="btn-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+  <main class="contact-container">
+    <h1>Hubungi <span>Motion-US</span></h1>
+    <p class="contact-tagline">Ada pertanyaan atau saran? Kirimkan pesanmu, kami senang membantu 📬</p>
+
+    <section class="contact-grid">
+      <!-- Form Card -->
+      <article class="card">
+        <form id="contactForm" class="contact-form">
+          <div class="grid-gap">
+            <div>
+              <label for="name">Nama</label>
+              <input id="name" class="input" type="text" placeholder="Nama lengkap" required />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" class="input" type="email" placeholder="email@contoh.com" required />
+            </div>
+            <div>
+              <label for="message">Pesan</label>
+              <textarea id="message" class="input" placeholder="Tulis pesanmu di sini…" required></textarea>
+            </div>
+            <button id="btnSend" class="btn" type="submit">Kirim Pesan</button>
+
+            <div id="formOk" class="alert ok">Pesan terkirim ✅ Kami akan membalas melalui email.</div>
+            <div id="formErr" class="alert error">Gagal mengirim pesan. Coba lagi.</div>
+          </div>
+        </form>
+      </article>
+
+      <!-- Info Card -->
+      <article class="card contact-info">
+        <h3 style="margin-top:0">Info Kontak</h3>
+        <p><strong>Email:</strong> support@motionus.com</p>
+        <p><strong>Instagram:</strong> @motion.us</p>
+        <p><strong>Alamat:</strong> Jakarta, Indonesia</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Badge token + navbar helpers -->
+  <script type="module" src="assets/js/badge.js"></script>
+  <!-- Page script (dipisah) -->
+  <script type="module" src="assets/js/pages/contact.js"></script>
+  <script src="assets/js/nav.js"></script>
+</body>
+</html>

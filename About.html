@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>About - Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Pakai stylesheet global yang sudah ada -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client (window.sb) -->
+  <script type="module" src="assets/js/supabaseClient.js"></script>
+</head>
+<body class="page-about">
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <img src="assets/img/logo.png" alt="Logo" class="navbar-logo" />
+    
+    <!-- Hamburger Button (tambahkan ini) -->
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <div class="navbar-links" id="navbarLinks">
+      <a href="Motion-US.html" class="active">Home</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Pricing.html">Pricing</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
+    <button class="btn-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+  <!-- Hero / Header -->
+  <header class="hero">
+    <h1>Tentang <span>Motion-US</span></h1>
+    <p class="about-tagline">Platform ringan untuk bikin motion content profesional — praktis, cepat, dan hemat.</p>
+  </header>
+
+  <!-- Section: Ringkas Tentang -->
+  <main style="max-width:1100px;margin:0 auto;padding:0 20px 30px">
+    <section class="features" style="margin-top:10px">
+      <article class="card" style="grid-column: 1 / -1">
+        <h3 style="margin-top:0">Misi Kami</h3>
+        <p style="margin-top:6px">
+          <strong>Motion-US</strong> membantu semua orang menghasilkan foto & video motion berkualitas tanpa ribet.
+          Dengan sistem token, kamu bebas pakai fitur kapan saja—tanpa beban langganan bulanan.
+        </p>
+      </article>
+    </section>
+
+    <!-- Section: Nilai / Keunggulan -->
+    <section class="features">
+      <article class="card">
+        <div class="icon">⚡</div>
+        <h3>Proses Kilat</h3>
+        <p>Antarmuka sederhana & otomatis. Dari rekam sampai unduh hanya beberapa klik.</p>
+      </article>
+      <article class="card">
+        <div class="icon">🎨</div>
+        <h3>Hasil Estetik</h3>
+        <p>Frame & layout rapi, cocok untuk konten sosial media atau cetak.</p>
+      </article>
+      <article class="card">
+        <div class="icon">💰</div>
+        <h3>Lebih Hemat</h3>
+        <p>Bayar sesuai pemakaian lewat token—tanpa komitmen jangka panjang.</p>
+      </article>
+      <article class="card">
+        <div class="icon">🔒</div>
+        <h3>Aman & Privat</h3>
+        <p>Login aman data akun dan transaksi tetap milikmu.</p>
+      </article>
+    </section>
+
+    <!-- Section: Cara Kerja Singkat -->
+    <section class="features">
+      <article class="card">
+        <div class="icon">1</div>
+        <h3>Masuk & Cek Token</h3>
+        <p>Login, lalu lihat sisa token di pojok kanan atas. Top-up kapan pun saat dibutuhkan.</p>
+      </article>
+      <article class="card">
+        <div class="icon">2</div>
+        <h3>Pilih Fitur</h3>
+        <p>Pakai <em>Foto Motion</em> atau <em>Motion Video</em>. Atur frame bila perlu.</p>
+      </article>
+      <article class="card">
+        <div class="icon">3</div>
+        <h3>Proses Otomatis</h3>
+        <p>Ambil foto/rekam video, sistem akan menyiapkan hasil ZIP atau PDF.</p>
+      </article>
+      <article class="card">
+        <div class="icon">4</div>
+        <h3>Unduh Hasil</h3>
+        <p>Token dipotong saat <strong>download</strong>. Simpan file & siap dipakai!</p>
+      </article>
+    </section>
+
+    <!-- Section: Ajakan -->
+    <section class="features" style="margin-top:4px">
+      <a class="card" href="Pricing.html" style="text-align:center">
+        <div class="icon">🚀</div>
+        <h3>Mulai Sekarang</h3>
+        <p>Dapatkan token & nikmati proses pembuatan motion content yang super simpel.</p>
+      </a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Badge token + navbar helpers -->
+  <script type="module" src="assets/js/badge.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <!-- (Opsional) Script halaman khusus About bila suatu saat dibutuhkan -->
+  <!-- <script type="module" src="assets/js/pages/about.js"></script> -->
+</body>
+</html>

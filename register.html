@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daftar | MOTION-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <!-- Global styles (punyamu) -->
+  <link rel="stylesheet" href="./assets/css/style.css" />
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client → window.sb -->
+  <script type="module" src="./assets/js/supabaseClient.js"></script>
+</head>
+<body>
+  <div class="center-screen">
+    <section class="card" aria-labelledby="t">
+      <header>
+        <h1 id="t" style="margin:0;font-size:18px">Buat Akun MOTION-US</h1>
+      </header>
+      <main>
+        <div id="err" class="alert error"></div>
+        <div id="ok"  class="alert ok"></div>
+
+        <form id="f">
+          <div class="grid-gap">
+            <div>
+              <label for="name">Nama Lengkap</label>
+              <input id="name" class="input" type="text" required />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" class="input" type="email" required />
+            </div>
+            <div>
+              <label for="pw">Kata sandi (≥ 6)</label>
+              <input id="pw" class="input" type="password" minlength="6" required />
+            </div>
+            <div>
+              <label for="pw2">Ulangi kata sandi</label>
+              <input id="pw2" class="input" type="password" minlength="6" required />
+            </div>
+          </div>
+          <button class="btn" id="submit" type="submit">Daftar</button>
+        </form>
+
+        <div style="height:12px"></div>
+        <a class="btn-ghost" href="./index.html">Sudah punya akun? Masuk</a>
+      </main>
+    </section>
+  </div>
+
+  <!-- JS halaman register -->
+  <script type="module" src="./assets/js/pages/register.js"></script>
+</body>
+</html>

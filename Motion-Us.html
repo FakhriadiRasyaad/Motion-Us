@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Motion-US Home</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client (window.sb) -->
+  <script type="module" src="assets/js/supabaseClient.js"></script>
+</head>
+<body class="page-home">
+
+ <!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <img src="assets/img/logo.png" alt="Logo" class="navbar-logo" />
+    
+    <!-- Hamburger Button (tambahkan ini) -->
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <div class="navbar-links" id="navbarLinks">
+      <a href="Motion-US.html" class="active">Home</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Pricing.html">Pricing</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
+    <button class="btn-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Selamat Datang di <span>Motion-US</span></h1>
+    <p>Pilih fitur yang kamu inginkan, gunakan tokenmu, dan mulai berkreasi!</p>
+  </header>
+
+  <!-- Feature cards -->
+  <main class="features">
+    <a class="card" id="btnPhoto">
+      <div class="icon">📸</div>
+      <h3>Foto Motion</h3>
+      <p>Ambil foto dengan frame otomatis dan hasilkan foto cute.</p>
+    </a>
+
+    <a class="card" id="btnVideo">
+      <div class="icon">🎥</div>
+      <h3>Motion Video</h3>
+      <p>Buat video motion keren, cocok untuk konten berikutnya.</p>
+    </a>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Badge token + navbar helpers (requireAuth, refresh, realtime) -->
+  <script type="module" src="assets/js/badge.js"></script>
+  <!-- Script khusus halaman Home (navigasi saja) -->
+  <script type="module" src="assets/js/pages/home.js"></script>
+  <script src="assets/js/nav.js"></script>
+  
+</body>
+</html>

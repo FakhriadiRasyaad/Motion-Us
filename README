@@ -1,0 +1,90 @@
+project-root/
+│
+├─ 📄 index.html              ← halaman login user
+├─ 📄 Motion-US.html          ← home page setelah login
+├─ 📄 Pricing.html            ← halaman daftar harga/token
+├─ 📄 Profil.html             ← halaman profil user
+├─ 📄 About.html              ← halaman tentang website
+├─ 📄 Contact.html            ← halaman kontak
+│
+├─ 📁 Pricing/
+│   └─ 📄 pembayaran.html     ← halaman pembayaran (QRIS/manual)
+│
+├─ 📁 MOTION-US/
+│   ├─ 📄 Photo.html          ← halaman fitur photo (butuh token, token -1)
+│   └─ 📄 Video.html          ← halaman fitur video (butuh token, token -1)
+│
+├─ 📁 adminungker/
+│   ├─ 📄 login.html          ← login admin
+│   └─ 📄 homepage.html       ← dashboard admin (kelola user, token, bukti bayar)
+│
+├─ 📁 assets/
+│   ├─ 📁 css/
+│   │   └─ style.css          ← CSS global
+│   │
+│   ├─ 📁 img/
+│   │   ├─ logo.png
+│   │   └─ frame.png          ← frame default foto
+│   │
+│   ├─ 📁 js/
+│   │   ├─ auth.js            ← login/logout user, proteksi halaman
+│   │   ├─ token.js           ← sistem token (cek, tambah, kurangi)
+│   │   ├─ camera.js          ← kamera, capture frame, export PDF/ZIP
+│   │   ├─ payment.js         ← logika pembayaran/QRIS
+│   │   └─ admin.js           ← kelola user + token dari sisi admin
+│   │
+│   └─ 📁 lib/
+│       ├─ jspdf.umd.min.js   ← library PDF
+│       ├─ jszip.min.js       ← library ZIP
+│       └─ FileSaver.min.js   ← library download file
+│
+└─ 📁 data/
+    └─ users.json             ← dummy user (username, password, token)
+
+└─ 📁 adminungker/
+    └─ login.html  ← halaman login admin
+    └─ homepage.html   ← halaman dashboard admin untuk mengetahui semua user dan ada bukti pembayaran dan disini untuk menambahkan token untuk ke user 
+
+
+
+
+project-root/
+│
+├─ 📄 index.html              ← halaman login
+├─ 📄 Motion-US.html               ← halaman utama setelah login
+├─ 📄 Pricing.html             ← Halaman untuk menampilkan harga pembayaran
+├─ 📄 Profil.html             ← Halaman profil user
+├─ 📄 About.html              ← halaman tentang website
+├─ 📄 Contact.html ← halaman tentang kontak
+├
+├─ 📁 Pricing/
+├─ 📄 pembayaran.html ← Halaman untuk pembayaran
+├─ 📁 MOTION-US/
+├─ 📄 Photo.html ← Halaman setelah bayar dan punya token baru bisa di akses jika token 0 ga bisa, saat akses ini token akan berkurang 1
+├─ 📄 Video.html ← Halaman setelah bayar dan punya token baru bisa di akses jika token 0 ga bisa, saat akses ini token akan berkurang 1
+
+├─ 📁 assets/
+│   ├─ 📁 css/
+│   │   └─ style.css          ← CSS global
+│   │
+│   ├─ 📁 img/
+│   │   ├─ frame.png          ← frame default (opsional)
+│   │   └─ logo.png
+│   │
+│   ├─ 📁 js/
+│   │   ├─ auth.js           ← fungsi login/logout & proteksi halaman
+│   │   ├─ token.js          ← cek & kurangi token
+│   │   ├─ camera.js         ← script kamera, ekstrak frame, buat ZIP & PDF
+│   │   ├─ payment.js        ← tampilan & logika QRIS/manual
+│   │   └─ admin.js         ← tambah token, kelola user
+        └─ video.js         ← tambah token, kelola user
+│       │─ photo.js         ← tambah token, kelola user
+│   └─ 📁 lib/
+│       ├─ jspdf.umd.min.js  ← library PDF
+│       ├─ jszip.min.js      ← library ZIP
+│       └─ FileSaver.min.js  ← library download file
+
+
+└─ 📁 adminungker/
+    └─ login.html  ← halaman login admin
+    └─ homepage.html   ← halaman dashboard admin untuk mengetahui semua user dan ada bukti pembayaran dan disini untuk menambahkan token untuk ke user 

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <title>Pembayaran | Motion-US</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/payment.css" />
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <!-- Init client → window.sb -->
+  <script type="module" src="../assets/js/supabaseClient.js"></script>
+</head>
+<body>
+
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <img src="../assets/img/logo.png" alt="Logo" class="navbar-logo" />
+    
+    <!-- Hamburger Button (tambahkan ini) -->
+    <button class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <div class="navbar-links" id="navbarLinks">
+      <a href="../Motion-US.html" class="active">Home</a>
+      <a href="../About.html">About</a>
+      <a href="../Contact.html">Contact</a>
+      <a href="../Pricing.html">Pricing</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
+    <button class="btn-logout" id="btnLogout">Logout</button>
+  </div>
+</nav>
+
+  <main class="pay-wrap">
+    <h1 class="pay-title">Kirim Bukti Pembayaran</h1>
+
+    <div class="pay-card">
+      <!-- Header QRIS -->
+      <div class="qris-head">
+        <span class="qris-badge">Metode: QRIS</span>
+      </div>
+
+      <!-- Logo / kode QRIS -->
+      <div class="qris-poster">
+        <img src="../assets/img/qris.png" alt="QRIS" class="qris-img" />
+        <small class="qris-note">Scan dan pastikan QRIS di atas benar, lalu upload bukti transfer.</small>
+      </div>
+
+      <!-- Alerts -->
+      <div id="mOk"  class="pay-msg pay-ok"></div>
+      <div id="mErr" class="pay-msg pay-err"></div>
+
+      <!-- Form -->
+      <div class="pay-row">
+        <label class="pay-label" for="amount">Kode Redeem</label>
+        <input id="amount" class="pay-input" type="text" placeholder="Ketik 1 jika tidak memiliki kode redeem" />
+      </div>
+
+      <div class="pay-row">
+        <label class="pay-label" for="file">Upload Bukti (gambar)</label>
+        <input id="file" class="pay-input" type="file" accept="image/*" />
+      </div>
+
+      <button id="btn" class="pay-btn">Kirim Bukti</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Badge token (auth + realtime) -->
+  <script type="module" src="../assets/js/badge.js"></script>
+  <!-- Script khusus halaman pembayaran -->
+  <script type="module" src="../assets/js/pages/payment.js"></script>
+  <script src="../assets/js/nav.js"></script>
+</body>
+</html>
