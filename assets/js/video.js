@@ -7,7 +7,7 @@ import { Filters } from './filters.js';
   // 📐 Konstanta
   const FRAME_W = 360;
   const FRAME_H = 270;
-  const JPEG_QUALITY = 0.92;
+  const JPEG_QUALITY = 1;
   const PAGE_W = 595; // A4 px (portrait)
   const PAGE_H = 842;
 
