@@ -16,7 +16,7 @@
   <div class="navbar-left">
     <img src="../assets/img/logo.png" alt="Logo" class="navbar-logo" />
     
-    <!-- Hamburger Button (tambahkan ini) -->
+    <!-- Hamburger Button -->
     <button class="hamburger" id="hamburger">
       <span></span>
       <span></span>
@@ -32,7 +32,6 @@
   </div>
   <div class="navbar-right">
     <div class="token-badge">Token: <strong id="tokenDisplay">0</strong></div>
-    <!-- <button class="btn-logout" id="btnLogout">Logout</button> -->
   </div>
 </nav>
 
@@ -60,12 +59,6 @@
           <div class="layout-title">3 Foto (Baris)</div>
         </button>
 
-        <!-- Layout 3 Foto Grid -->
-        <button class="layout-card" data-layout="3grid" data-count="3">
-          <div class="layout-visual layout-3grid"></div>
-          <div class="layout-title">3 Foto (Grid)</div>
-        </button>
-
         <!-- Layout 4 Foto -->
         <button class="layout-card" data-layout="4grid" data-count="4">
           <div class="layout-visual layout-4grid"></div>
@@ -76,6 +69,12 @@
         <button class="layout-card" data-layout="5mix" data-count="5">
           <div class="layout-visual layout-5mix"></div>
           <div class="layout-title">5 Foto (Mix)</div>
+        </button>
+
+        <!-- Layout 6 Foto -->
+        <button class="layout-card" data-layout="6grid" data-count="6">
+          <div class="layout-visual layout-6grid"></div>
+          <div class="layout-title">6 Foto (Grid)</div>
         </button>
       </div>
       <div class="step-actions">
@@ -100,18 +99,16 @@
             <button id="btnResetCap" class="btn secondary">🔄 Ulangi Terakhir</button>
           </div>
           <div class="muted small" id="capInfo">0 foto diambil</div>
+          <button id="btnMirror" class="btn secondary full">🪞 Mirror Kamera</button>
         </div>
       </div>
 
       <div class="step-actions">
         <button id="backTo1" class="btn secondary">← Kembali</button>
         <button id="goStep3" class="btn ok" disabled>→ Lanjut Edit</button>
-        <button id="backTo1" class="btn secondary">Mirror Kamera</button>
-        
       </div>
 
-      <!-- di <aside class="vid-right"> ... -->
-        <div id="filterPanel" style="margin-top:1rem;"></div>
+      <div id="filterPanel" style="margin-top:1rem;"></div>
 
       <canvas id="hiddenCanvas" width="1280" height="720" hidden></canvas>
     </section>
@@ -129,7 +126,58 @@
 
         <!-- Panel kontrol -->
         <aside class="panel">
-          <!-- Preset Frame (muncul di editor sesuai permintaan) -->
+<!-- Kontrol objek terpilih -->
+<div class="panel-group">
+  <h3>Kontrol Objek</h3>
+  <div class="row">
+    <label>Jenis:</label>
+    <select id="selTarget">
+      <option value="p0">Foto 1</option>
+    </select>
+  </div>
+
+  <!-- Kontrol Posisi dengan Joystick -->
+  <div class="control-section">
+    <label>Posisi:</label>
+    <div class="joystick-control">
+      <button class="joy-btn joy-up" id="moveUp">▲</button>
+      <div class="joy-middle">
+        <button class="joy-btn joy-left" id="moveLeft">◀</button>
+        <button class="joy-btn joy-center" id="btnCenter">⊙</button>
+        <button class="joy-btn joy-right" id="moveRight">▶</button>
+      </div>
+      <button class="joy-btn joy-down" id="moveDown">▼</button>
+    </div>
+  </div>
+
+  <!-- Kontrol Skala dengan +/- -->
+  <div class="control-section">
+    <label>Skala: <span id="scaleVal">100%</span></label>
+    <div class="control-with-buttons">
+      <button class="ctrl-btn" id="scaleDown">−</button>
+      <input id="scale" type="range" min="10" max="300" value="100">
+      <button class="ctrl-btn" id="scaleUp">+</button>
+    </div>
+  </div>
+
+  <!-- Kontrol Rotasi dengan +/- -->
+  <div class="control-section">
+    <label>Rotasi: <span id="rotVal">0°</span></label>
+    <div class="control-with-buttons">
+      <button class="ctrl-btn" id="rotateLeft">−</button>
+      <input id="rotate" type="range" min="-180" max="180" value="0">
+      <button class="ctrl-btn" id="rotateRight">+</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <button id="btnDelSticker" class="btn danger thin full">🗑️ Hapus Sticker</button>
+  </div>
+</div>
+
+
+
+          <!-- Preset Frame -->
           <div class="panel-group">
             <h3>Frame (Opsional)</h3>
             <div id="framePreset" class="thumb-grid"></div>
@@ -146,31 +194,7 @@
             <div id="stickerPreset" class="thumb-grid"></div>
           </div>
 
-          <!-- Kontrol objek terpilih -->
-          <div class="panel-group">
-            <h3>Kontrol Objek</h3>
-            <div class="row">
-              <label>Jenis:</label>
-              <select id="selTarget">
-                <option value="p0">Foto 1</option>
-              </select>
-            </div>
-
-            <div class="row">
-              <label>Skala: <span id="scaleVal">100%</span></label>
-              <input id="scale" type="range" min="10" max="300" value="100">
-            </div>
-
-            <div class="row">
-              <label>Rotasi: <span id="rotVal">0°</span></label>
-              <input id="rotate" type="range" min="-180" max="180" value="0">
-            </div>
-
-            <div class="row">
-              <button id="btnCenter" class="btn thin">Pusatkan</button>
-              <button id="btnDelSticker" class="btn danger thin">Hapus Sticker</button>
-            </div>
-          </div>
+          
 
           <div class="panel-group">
             <button id="btnDownloadJpg" class="btn ok full">💾 Download JPG</button>
@@ -197,15 +221,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="../assets/js/supabaseClient.js"></script>
 
-  <!-- Badge token (requireAuth + realtime + expose refreshTokenBadge) -->
+  <!-- Badge token -->
   <script type="module" src="../assets/js/badge.js"></script>
 
-  <!-- Potong token (kita panggil saat "Lanjut Edit") -->
+  <!-- Charge token -->
   <script type="module" src="../assets/js/charge-on-download.js"></script>
 
   <!-- Halaman khusus -->
   <script type="module" src="../assets/js/photo.js"></script>
   <script src="../assets/js/nav.js"></script>
 </body>
-
 </html>
