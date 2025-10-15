@@ -1,5 +1,5 @@
 // assets/js/photo.js  (module)
-// Photobooth: Mirror + Filters panel + capture baked filter
+// Photobooth: Mirror + Filters + Enhanced Controls
 import { Filters } from './filters.js';
 
 const $ = (s) => document.querySelector(s);
@@ -23,6 +23,7 @@ const thumbs = $('#thumbs');
 const capInfo = $('#capInfo');
 const btnCapture = $('#btnCapture');
 const btnResetCap = $('#btnResetCap');
+const btnMirror = $('#btnMirror');
 
 const stage = $('#stage');
 const g = stage.getContext('2d');
@@ -42,35 +43,37 @@ const rotVal = $('#rotVal');
 const btnCenter = $('#btnCenter');
 const btnDelSticker = $('#btnDelSticker');
 
+// New control buttons
+const scaleUp = $('#scaleUp');
+const scaleDown = $('#scaleDown');
+const rotateLeft = $('#rotateLeft');
+const rotateRight = $('#rotateRight');
+const moveUp = $('#moveUp');
+const moveDown = $('#moveDown');
+const moveLeft = $('#moveLeft');
+const moveRight = $('#moveRight');
+
 const btnDownloadJpg = $('#btnDownloadJpg');
 
 let stream = null;
 
-// ============ FILTER PANEL (dibuat di Step 2: cam-side) ============
+// ============ FILTER PANEL ============
 (function addFilterPanel() {
-  const camSide = document.querySelector('#step2 .cam-side');
-  if (camSide) {
-    const panel = document.createElement('div');
-    panel.id = 'filterPanel';
-    panel.style.marginTop = '1rem';
-    camSide.appendChild(panel);
-    Filters.buildPanel(panel, () => {
-      // live preview pakai CSS filter
+  const filterPanelEl = $('#filterPanel');
+  if (filterPanelEl) {
+    Filters.buildPanel(filterPanelEl, () => {
       Filters.applyCSSTo(video);
     });
     Filters.applyCSSTo(video);
   }
 })();
 
-// ====== Mirror Kamera di Step 2 ======
+// ====== Mirror Kamera ======
 let isMirrored = false;
-const mirrorBtn = [...document.querySelectorAll('#step2 .step-actions .btn')]
-  .find(b => b.textContent.trim().toLowerCase().includes('mirror kamera'));
-
-mirrorBtn?.addEventListener('click', () => {
+btnMirror?.addEventListener('click', () => {
   isMirrored = !isMirrored;
   video.classList.toggle('mirrored', isMirrored);
-  mirrorBtn.classList.toggle('active', isMirrored);
+  btnMirror.classList.toggle('active', isMirrored);
   Filters.applyCSSTo(video);
 });
 
@@ -78,7 +81,6 @@ mirrorBtn?.addEventListener('click', () => {
 let chosenLayout = '3row';
 let photoCount = 3;
 
-// Handle layout selection
 $$('.layout-card').forEach(card => {
   card.addEventListener('click', () => {
     $$('.layout-card').forEach(c => c.classList.remove('selected'));
@@ -153,7 +155,6 @@ async function doCountdown(sec = 3) {
   countdownEl.classList.add('hidden');
 }
 
-// CAPTURE: mirror + filter baked
 btnCapture.addEventListener('click', async () => {
   if (shotCount >= photoCount) return;
   await doCountdown(3);
@@ -161,7 +162,6 @@ btnCapture.addEventListener('click', async () => {
   const vw = video.videoWidth || 1280;
   const vh = video.videoHeight || 720;
 
-  // 1) gambar dari video ke tempSrc (mirror jika perlu)
   const tempSrc = document.createElement('canvas');
   tempSrc.width = vw; tempSrc.height = vh;
   const sctx = tempSrc.getContext('2d');
@@ -174,16 +174,13 @@ btnCapture.addEventListener('click', async () => {
   sctx.drawImage(video, 0, 0, vw, vh);
   sctx.restore();
 
-  // 2) bake filter ke hiddenCanvas (hasil capture sudah final)
   Filters.bakeToCanvas(hiddenCanvas, tempSrc);
 
-  // 3) buat blob/bitmap dari hiddenCanvas
   const blob = await new Promise(res => hiddenCanvas.toBlob(res, 'image/jpeg', 0.92));
   const bmp = await createImageBitmap(blob);
   shots[shotCount] = bmp;
   shotCount++;
 
-  // Thumbnail
   const cell = thumbs.querySelector(`.ph[data-i="${shotCount-1}"]`);
   cell.classList.remove('empty');
   cell.innerHTML = '';
@@ -196,7 +193,6 @@ btnCapture.addEventListener('click', async () => {
   updateCapInfo();
 });
 
-// ULANGI 1 FOTO TERAKHIR (bukan semua)
 btnResetCap.addEventListener('click', () => {
   if (shotCount === 0) return;
   shotCount--;
@@ -229,16 +225,13 @@ backTo2Btn.addEventListener('click', () => {
 // ====== Step 3: Editor ======
 let objects = [];
 let activeIndex = 0;
-let stickerActiveIndex = -1;
 
 async function initEditor() {
   objects = [];
 
-  // Portrait canvas
   stage.width = 720;
   stage.height = 1080;
 
-  // Update select options
   selTarget.innerHTML = '';
   for (let i = 0; i < photoCount; i++) {
     const opt = document.createElement('option');
@@ -295,25 +288,6 @@ function applyLayout() {
       break;
     }
 
-    case '3grid': {
-      const topH = ch * 0.5;
-      const botH = ch * 0.5;
-      const halfW = cw / 2;
-
-      const bmp0 = shots[0];
-      const fit0 = coverFit(bmp0.width, bmp0.height, cw, topH);
-      objects.push({ kind: 'photo', img: bmp0, x: (cw - fit0.w) / 2, y: (topH - fit0.h) / 2, w: fit0.w, h: fit0.h, rot: 0 });
-
-      const bmp1 = shots[1];
-      const fit1 = coverFit(bmp1.width, bmp1.height, halfW, botH);
-      objects.push({ kind: 'photo', img: bmp1, x: (halfW - fit1.w) / 2, y: topH + (botH - fit1.h) / 2, w: fit1.w, h: fit1.h, rot: 0 });
-
-      const bmp2 = shots[2];
-      const fit2 = coverFit(bmp2.width, bmp2.height, halfW, botH);
-      objects.push({ kind: 'photo', img: bmp2, x: halfW + (halfW - fit2.w) / 2, y: topH + (botH - fit2.h) / 2, w: fit2.w, h: fit2.h, rot: 0 });
-      break;
-    }
-
     case '4grid': {
       const halfW = cw / 2;
       const halfH = ch / 2;
@@ -352,6 +326,23 @@ function applyLayout() {
         const fit = coverFit(bmp.width, bmp.height, halfW, botH);
         const ox = (i - 3) * halfW + (halfW - fit.w) / 2;
         objects.push({ kind: 'photo', img: bmp, x: ox, y: topH + midH + (botH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
+      }
+      break;
+    }
+
+    case '6grid': {
+      const cellW = cw / 2;
+      const cellH = ch / 3;
+      const positions = [
+        [0, 0], [cellW, 0],
+        [0, cellH], [cellW, cellH],
+        [0, cellH * 2], [cellW, cellH * 2]
+      ];
+      for (let i = 0; i < 6; i++) {
+        const bmp = shots[i];
+        const fit = coverFit(bmp.width, bmp.height, cellW, cellH);
+        const [baseX, baseY] = positions[i];
+        objects.push({ kind: 'photo', img: bmp, x: baseX + (cellW - fit.w) / 2, y: baseY + (cellH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
       }
       break;
     }
@@ -400,7 +391,6 @@ function loadStickerPresets(max = 20) {
       objects.push({ kind: 'sticker', img: el, x: (stage.width - w)/2, y: (stage.height - h)/2, w, h, rot: 0 });
       activeIndex = objects.length - 1;
       selTarget.value = 'sticker';
-      stickerActiveIndex = activeIndex;
       syncUIToActive();
       draw();
     });
@@ -449,13 +439,13 @@ selTarget.addEventListener('change', () => {
   } else if (v === 'sticker') {
     const idx = [...objects].reverse().findIndex(o => o.kind === 'sticker');
     activeIndex = idx === -1 ? 0 : objects.length - 1 - idx;
-    stickerActiveIndex = activeIndex;
   } else {
     activeIndex = Number(v.slice(1));
   }
   syncUIToActive();
 });
 
+// Scale slider
 scaleSlider.addEventListener('input', () => {
   const o = objects[activeIndex];
   if (!o) return;
@@ -469,6 +459,22 @@ scaleSlider.addEventListener('input', () => {
   draw();
 });
 
+// Scale +/- buttons
+scaleUp.addEventListener('click', () => {
+  let val = Number(scaleSlider.value);
+  val = Math.min(300, val + 5);
+  scaleSlider.value = val;
+  scaleSlider.dispatchEvent(new Event('input'));
+});
+
+scaleDown.addEventListener('click', () => {
+  let val = Number(scaleSlider.value);
+  val = Math.max(10, val - 5);
+  scaleSlider.value = val;
+  scaleSlider.dispatchEvent(new Event('input'));
+});
+
+// Rotate slider
 rotateSlider.addEventListener('input', () => {
   const o = objects[activeIndex];
   if (!o) return;
@@ -477,6 +483,53 @@ rotateSlider.addEventListener('input', () => {
   draw();
 });
 
+// Rotate +/- buttons
+rotateRight.addEventListener('click', () => {
+  let val = Number(rotateSlider.value);
+  val = Math.min(180, val + 5);
+  rotateSlider.value = val;
+  rotateSlider.dispatchEvent(new Event('input'));
+});
+
+rotateLeft.addEventListener('click', () => {
+  let val = Number(rotateSlider.value);
+  val = Math.max(-180, val - 5);
+  rotateSlider.value = val;
+  rotateSlider.dispatchEvent(new Event('input'));
+});
+
+// Position controls (joystick)
+const moveStep = 10;
+
+moveUp.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o) return;
+  o.y -= moveStep;
+  draw();
+});
+
+moveDown.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o) return;
+  o.y += moveStep;
+  draw();
+});
+
+moveLeft.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o) return;
+  o.x -= moveStep;
+  draw();
+});
+
+moveRight.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o) return;
+  o.x += moveStep;
+  draw();
+});
+
+// Center button
 btnCenter.addEventListener('click', () => {
   const o = objects[activeIndex];
   if (!o) return;
@@ -489,7 +542,6 @@ btnDelSticker.addEventListener('click', () => {
   const idx = objects.findIndex((o, i) => o.kind === 'sticker' && i === activeIndex);
   if (idx !== -1) {
     objects.splice(idx, 1);
-    stickerActiveIndex = -1;
     activeIndex = 0; selTarget.value = 'p0';
     syncUIToActive();
     draw();
@@ -512,6 +564,7 @@ stage.addEventListener('mousedown', (e) => {
     drag.dy = p.y - objects[hit].y;
   }
 });
+
 window.addEventListener('mousemove', (e) => {
   if (!drag.on) return;
   const p = getPointer(e);
@@ -520,6 +573,7 @@ window.addEventListener('mousemove', (e) => {
   o.y = p.y - drag.dy;
   draw();
 });
+
 window.addEventListener('mouseup', ()=> drag.on=false);
 
 stage.addEventListener('touchstart', (e)=>{
@@ -537,6 +591,7 @@ stage.addEventListener('touchstart', (e)=>{
     drag.dy = p.y - objects[hit].y;
   }
 }, {passive:true});
+
 stage.addEventListener('touchmove', (e)=>{
   if (!drag.on) return;
   const t = e.touches[0];
@@ -547,9 +602,10 @@ stage.addEventListener('touchmove', (e)=>{
   o.y = p.y - drag.dy;
   draw();
 }, {passive:true});
+
 stage.addEventListener('touchend', ()=> drag.on=false);
 
-// ===== Download JPG (bake watermark saja; foto sudah terfilter saat capture) =====
+// ===== Download JPG =====
 btnDownloadJpg.addEventListener('click', async ()=>{
   const out = document.createElement('canvas');
   out.width = stage.width;
@@ -559,7 +615,6 @@ btnDownloadJpg.addEventListener('click', async ()=>{
   c.fillRect(0,0,out.width,out.height);
   c.drawImage(stage, 0, 0);
   
-  // Watermark
   c.fillStyle = '#0b1020';
   c.globalAlpha = 0.6;
   c.font = 'bold 18px system-ui,Segoe UI,Roboto,Arial';
@@ -660,276 +715,7 @@ function drawObject(o){
   g.restore();
 }
 
-// ===== init badge + logout button =====
+// ===== init badge + logout =====
 import { initTokenBadge, logoutUser } from './badge.js';
 initTokenBadge();
 $('#btnLogout')?.addEventListener('click', logoutUser);
-
-
-
-
-// // assets/js/photo.js
-// import { consumeOnFirstDownload, resetDownloadCharge } from './charge-on-download.js';
-
-// let selectedFrame = null;
-// let capturedPhotos = [];
-// let photoCount = 0;
-// let stream = null;
-// let selectedPhotoIndex = 0;
-// let isDragging = false, dragOffset = { x: 0, y: 0 };
-
-// const photoTransforms = [
-//   { x: 100, y: 100, scale: 1, rotation: 0 },
-//   { x: 300, y: 100, scale: 1, rotation: 0 },
-//   { x: 500, y: 100, scale: 1, rotation: 0 }
-// ];
-
-// const defaultFrames = [
-//   {
-//     name: "Frame Classic",
-//     data: 'data:image/svg+xml;base64,' + btoa(
-//       `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-//         <rect width="800" height="600" fill="white"/>
-//         <rect x="50" y="50" width="200" height="150" fill="none" stroke="#667eea" stroke-width="8" rx="10"/>
-//         <rect x="300" y="50" width="200" height="150" fill="none" stroke="#667eea" stroke-width="8" rx="10"/>
-//         <rect x="550" y="50" width="200" height="150" fill="none" stroke="#667eea" stroke-width="8" rx="10"/>
-//         <text x="400" y="280" font-family="Arial" font-size="48" fill="#667eea" text-anchor="middle" font-weight="bold">MOTION-US</text>
-//       </svg>`
-//     )
-//   },
-//   {
-//     name: "Frame Gradient",
-//     data: 'data:image/svg+xml;base64,' + btoa(
-//       `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-//         <defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-//           <stop offset="0%" style="stop-color:#667eea;"/><stop offset="100%" style="stop-color:#764ba2;"/>
-//         </linearGradient></defs>
-//         <rect width="800" height="600" fill="url(#g)"/>
-//         <circle cx="150" cy="125" r="80" fill="white" opacity="0.9"/>
-//         <circle cx="400" cy="125" r="80" fill="white" opacity="0.9"/>
-//         <circle cx="650" cy="125" r="80" fill="white" opacity="0.9"/>
-//       </svg>`
-//     )
-//   }
-// ];
-
-// document.addEventListener('DOMContentLoaded', () => {
-//   loadFrames();
-
-//   document.getElementById('frameUpload').addEventListener('change', handleFrameUpload);
-//   document.getElementById('btnToStep2').addEventListener('click', goToStep2);
-//   document.getElementById('captureBtn').addEventListener('click', capturePhoto);
-//   document.getElementById('resetBtn').addEventListener('click', resetPhotos);
-//   document.getElementById('btnToStep3').addEventListener('click', goToStep3);
-//   document.getElementById('backToStep2').addEventListener('click', () => showStep(2));
-//   document.getElementById('downloadBtn').addEventListener('click', downloadResult);
-
-//   document.getElementById('scaleSlider').addEventListener('input', (e) => updatePhotoScale(e.target.value));
-//   document.getElementById('rotationSlider').addEventListener('input', (e) => updatePhotoRotation(e.target.value));
-// });
-
-// function loadFrames() {
-//   const frameOptions = document.getElementById('frameOptions');
-//   defaultFrames.forEach(frame => {
-//     const div = document.createElement('div');
-//     div.className = 'frame-option';
-//     div.onclick = () => selectFrame(frame.data, div);
-//     div.innerHTML = `<img src="${frame.data}" alt="${frame.name}"><p>${frame.name}</p>`;
-//     frameOptions.appendChild(div);
-//   });
-// }
-
-// function selectFrame(frameData, element) {
-//   document.querySelectorAll('.frame-option').forEach(el => el.classList.remove('selected'));
-//   element.classList.add('selected');
-//   selectedFrame = frameData;
-// }
-
-// function handleFrameUpload(e) {
-//   const file = e.target.files[0];
-//   if (file) {
-//     const reader = new FileReader();
-//     reader.onload = ev => selectedFrame = ev.target.result;
-//     reader.readAsDataURL(file);
-//   }
-// }
-
-// function showStep(step) {
-//   document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-//   document.getElementById('step' + step).classList.add('active');
-// }
-
-// async function goToStep2() {
-//   if (!selectedFrame) return alert('Pilih frame terlebih dahulu!');
-//   showStep(2);
-
-//   // ✅ mulai sesi baru → reset flag charge
-//   resetDownloadCharge();
-
-//   try {
-//     stream = await navigator.mediaDevices.getUserMedia({ video: true });
-//     document.getElementById('video').srcObject = stream;
-//   } catch (err) {
-//     alert('Tidak dapat akses kamera: ' + err.message);
-//   }
-// }
-
-// function goToStep3() {
-//   stopCamera();
-//   showStep(3);
-//   initPreview();
-// }
-
-// function stopCamera() {
-//   if (stream) stream.getTracks().forEach(t => t.stop());
-// }
-
-// function capturePhoto() {
-//   if (photoCount >= 3) return;
-//   const video = document.getElementById('video');
-//   const canvas = document.getElementById('canvas');
-//   const countdown = document.getElementById('countdown');
-
-//   let count = 3;
-//   countdown.style.display = 'block';
-//   countdown.textContent = count;
-
-//   const timer = setInterval(() => {
-//     count--;
-//     countdown.textContent = count > 0 ? count : '📸';
-//     if (count <= 0) {
-//       clearInterval(timer);
-//       setTimeout(() => {
-//         canvas.width = video.videoWidth;
-//         canvas.height = video.videoHeight;
-//         canvas.getContext('2d').drawImage(video, 0, 0);
-//         const photoData = canvas.toDataURL('image/png');
-//         capturedPhotos.push(photoData);
-//         photoCount++;
-//         const slot = document.getElementById('photo' + photoCount);
-//         slot.innerHTML = `<img src="${photoData}">`;
-//         slot.classList.remove('empty');
-//         document.getElementById('photoCount').textContent = photoCount;
-//         countdown.style.display = 'none';
-//         if (photoCount === 3) document.getElementById('btnToStep3').style.display = 'inline-block';
-//       }, 500);
-//     }
-//   }, 1000);
-// }
-
-// function resetPhotos() {
-//   if (!confirm('Hapus semua foto?')) return;
-//   capturedPhotos = [];
-//   photoCount = 0;
-//   document.getElementById('photoCount').textContent = 0;
-//   document.getElementById('btnToStep3').style.display = 'none';
-//   for (let i = 1; i <= 3; i++) {
-//     const el = document.getElementById('photo' + i);
-//     el.innerHTML = '';
-//     el.classList.add('empty');
-//   }
-//   // ✅ reset flag charge karena user mulai ulang
-//   resetDownloadCharge();
-// }
-
-// // ================= Preview & Editing =================
-// function initPreview() {
-//   const canvas = document.getElementById('previewCanvas');
-//   canvas.width = 800;
-//   canvas.height = 600;
-//   canvas.addEventListener('mousedown', startDrag);
-//   canvas.addEventListener('mousemove', drag);
-//   canvas.addEventListener('mouseup', endDrag);
-//   drawPreview();
-// }
-
-// function drawPreview() {
-//   const canvas = document.getElementById('previewCanvas');
-//   const ctx = canvas.getContext('2d');
-//   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//   const frameImg = new Image();
-//   frameImg.onload = () => {
-//     ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-//     capturedPhotos.forEach((p, i) => {
-//       const img = new Image();
-//       img.onload = () => {
-//         const t = photoTransforms[i];
-//         ctx.save();
-//         ctx.translate(t.x, t.y);
-//         ctx.rotate(t.rotation * Math.PI / 180);
-//         ctx.scale(t.scale, t.scale);
-//         const size = 150;
-//         ctx.drawImage(img, -size / 2, -size / 2, size, size);
-//         if (i === selectedPhotoIndex) {
-//           ctx.strokeStyle = '#667eea'; ctx.lineWidth = 3;
-//           ctx.strokeRect(-size / 2, -size / 2, size, size);
-//         }
-//         ctx.restore();
-//       };
-//       img.src = p;
-//     });
-//   };
-//   frameImg.src = selectedFrame;
-// }
-
-// function startDrag(e) {
-//   const rect = e.target.getBoundingClientRect();
-//   const x = e.clientX - rect.left, y = e.clientY - rect.top;
-//   const t = photoTransforms[selectedPhotoIndex];
-//   const size = 150 * t.scale;
-//   if (Math.abs(x - t.x) < size / 2 && Math.abs(y - t.y) < size / 2) {
-//     isDragging = true;
-//     dragOffset.x = x - t.x;
-//     dragOffset.y = y - t.y;
-//   }
-// }
-
-// function drag(e) {
-//   if (!isDragging) return;
-//   const rect = e.target.getBoundingClientRect();
-//   const x = e.clientX - rect.left, y = e.clientY - rect.top;
-//   photoTransforms[selectedPhotoIndex].x = x - dragOffset.x;
-//   photoTransforms[selectedPhotoIndex].y = y - dragOffset.y;
-//   drawPreview();
-// }
-
-// function endDrag() { isDragging = false; }
-
-// window.selectPhoto = function(i) {
-//   selectedPhotoIndex = i;
-//   document.getElementById('scaleSlider').value = photoTransforms[i].scale * 100;
-//   document.getElementById('rotationSlider').value = photoTransforms[i].rotation;
-//   document.getElementById('scaleValue').textContent = Math.round(photoTransforms[i].scale * 100) + '%';
-//   document.getElementById('rotationValue').textContent = photoTransforms[i].rotation + '°';
-//   drawPreview();
-// };
-
-// function updatePhotoScale(val) {
-//   const scale = val / 100;
-//   photoTransforms[selectedPhotoIndex].scale = scale;
-//   document.getElementById('scaleValue').textContent = val + '%';
-//   drawPreview();
-// }
-
-// function updatePhotoRotation(val) {
-//   const rotation = parseInt(val);
-//   photoTransforms[selectedPhotoIndex].rotation = rotation;
-//   document.getElementById('rotationValue').textContent = rotation + '°';
-//   drawPreview();
-// }
-
-// async function downloadResult() {
-//   // ✅ Potong token hanya saat klik download pertama
-//   const ok = await consumeOnFirstDownload('photo');
-//   if (!ok) return;
-
-//   // Pastikan preview terbaru tergambar
-//   drawPreview();
-
-//   const canvas = document.getElementById('previewCanvas');
-//   const link = document.createElement('a');
-//   link.download = 'photobooth.png';
-//   link.href = canvas.toDataURL('image/png');
-//   link.click();
-// }
