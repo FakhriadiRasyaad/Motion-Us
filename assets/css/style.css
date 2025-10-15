@@ -13,11 +13,11 @@
     --shadow: 0 10px 25px rgba(0,0,0,.06);
   
     /* soft grayscale palette */
-    --p1: #9ca3af; /* soft gray */
-    --p2: #d1d5db; /* lighter gray */
-    --p3: #6b7280; /* medium gray */
-    --p4: #4b5563; /* dark gray */
-    --p5: #f3f4f6; /* very light gray */
+    --p1: #9ca3af;
+    --p2: #d1d5db;
+    --p3: #6b7280;
+    --p4: #4b5563;
+    --p5: #f3f4f6;
   
     --primary: #374151;
     --primary-2: #4b5563;
@@ -120,153 +120,146 @@
   
   .navbar-profile { cursor: pointer; font-size: 20px; }
   
-
   /* =========================================================
    HAMBURGER BUTTON
    ========================================================= */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 8px;
-  z-index: 11;
-}
-
-.hamburger span {
-  width: 25px;
-  height: 3px;
-  background: var(--text);
-  border-radius: 3px;
-  transition: all 0.3s ease;
-}
-
-/* Animasi hamburger jadi X */
-.hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(7px, 7px);
-}
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-.hamburger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* =========================================================
-   RESPONSIVE - MOBILE
-   ========================================================= */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 12px 16px;
-  }
-
   .hamburger {
-    display: flex;
-  }
-
-  /* Mobile menu */
-  .navbar-links {
-    position: fixed;
-    top: 57px;
-    left: -100%;
-    width: 280px;
-    max-width: 80%;
-    height: calc(100vh - 57px);
-    background: rgba(255,255,255,.98);
-    backdrop-filter: blur(12px);
+    display: none;
     flex-direction: column;
-    padding: 24px 0;
-    gap: 0;
-    transition: left 0.3s ease;
-    border-right: 1px solid var(--border);
-    box-shadow: 2px 0 12px rgba(0,0,0,.08);
-  }
-
-  .navbar-links.active {
-    left: 0;
-  }
-
-  .navbar-links a {
-    width: 100%;
-    padding: 16px 24px;
-    font-size: 16px;
-    border-radius: 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .navbar-links a:hover {
-    background: #f9fafb;
-    padding-left: 28px;
-  }
-
-  .navbar-links a.active {
-    background: #f3f4f6;
-    border-left: 4px solid var(--primary);
-    padding-left: 20px;
-  }
-
-  /* Compact right section */
-  .navbar-right {
-    gap: 8px;
-  }
-
-  .token-badge {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .btn-logout {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .navbar-logo {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-/* Overlay untuk mobile menu */
-.navbar-overlay {
-  display: none;
-  position: fixed;
-  top: 57px;
-  left: 0;
-  width: 100%;
-  height: calc(100vh - 57px);
-  background: rgba(0,0,0,0.5);
-  z-index: 9;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.navbar-overlay.active {
-  display: block;
-  opacity: 1;
-}
-
-/* Tablet */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .navbar {
-    padding: 12px 20px;
-  }
-
-  .navbar-links {
-    gap: 4px;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 8px;
+    z-index: 11;
   }
   
-  .navbar-links a {
-    padding: 6px 10px;
-    font-size: 13px;
+  .hamburger span {
+    width: 25px;
+    height: 3px;
+    background: var(--text);
+    border-radius: 3px;
+    transition: all 0.3s ease;
   }
-
-  .token-badge {
-    font-size: 12px;
+  
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
   }
-}
-
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+  
+  /* =========================================================
+     RESPONSIVE - MOBILE
+     ========================================================= */
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 12px 16px;
+    }
+  
+    .hamburger {
+      display: flex;
+    }
+  
+    .navbar-links {
+      position: fixed;
+      top: 57px;
+      left: -100%;
+      width: 280px;
+      max-width: 80%;
+      height: calc(100vh - 57px);
+      background: rgba(255,255,255,.98);
+      backdrop-filter: blur(12px);
+      flex-direction: column;
+      padding: 24px 0;
+      gap: 0;
+      transition: left 0.3s ease;
+      border-right: 1px solid var(--border);
+      box-shadow: 2px 0 12px rgba(0,0,0,.08);
+    }
+  
+    .navbar-links.active {
+      left: 0;
+    }
+  
+    .navbar-links a {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 16px;
+      border-radius: 0;
+      border-bottom: 1px solid var(--border);
+    }
+  
+    .navbar-links a:hover {
+      background: #f9fafb;
+      padding-left: 28px;
+    }
+  
+    .navbar-links a.active {
+      background: #f3f4f6;
+      border-left: 4px solid var(--primary);
+      padding-left: 20px;
+    }
+  
+    .navbar-right {
+      gap: 8px;
+    }
+  
+    .token-badge {
+      padding: 6px 10px;
+      font-size: 11px;
+    }
+  
+    .btn-logout {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  
+    .navbar-logo {
+      width: 32px;
+      height: 32px;
+    }
+  }
+  
+  .navbar-overlay {
+    display: none;
+    position: fixed;
+    top: 57px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 57px);
+    background: rgba(0,0,0,0.5);
+    z-index: 9;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .navbar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+  
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .navbar {
+      padding: 12px 20px;
+    }
+  
+    .navbar-links {
+      gap: 4px;
+    }
+    
+    .navbar-links a {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+  
+    .token-badge {
+      font-size: 12px;
+    }
+  }
   
   /* =========================================================
      INDEX PAGE (Hero + Features + Footer)
@@ -629,8 +622,6 @@
   .contact-info p{ margin: 8px 0; }
   .contact-info strong{ color: var(--text); }
   
-  .alert{ display:none; margin-top: 10px; }
-  
   @media (max-width: 900px){
     .contact-grid{
       grid-template-columns: 1fr;
@@ -818,7 +809,7 @@
   /* =========================================================
    COUNTDOWN - SIMPLE & STABLE (untuk semua page)
    ========================================================= */
-.countdown {
+  .countdown {
     position: absolute;
     inset: 0;
     display: flex;
@@ -840,7 +831,6 @@
     display: none !important;
   }
   
-  /* Responsive */
   @media (max-width: 768px) {
     .countdown {
       font-size: 100px;
@@ -856,10 +846,6 @@
   @keyframes pulse {
     0%, 100% { transform: translate(-50%, -50%) scale(1); }
     50% { transform: translate(-50%, -50%) scale(1.2); }
-  }
-  
-  .countdown.hidden {
-    display: none;
   }
   
   .timer {
@@ -924,7 +910,7 @@
     cursor: not-allowed;
   }
   
-  .btn:not(.secondary):not(.warn):not(.ok) {
+  .btn:not(.secondary):not(.warn):not(.ok):not(.danger) {
     background: var(--text);
     color: white;
   }
@@ -954,6 +940,15 @@
   
   .btn.ok:hover {
     background: #059669;
+  }
+  
+  .btn.danger {
+    background: var(--err);
+    color: white;
+  }
+  
+  .btn.danger:hover {
+    background: #dc2626;
   }
   
   .frame-upload {
@@ -1193,10 +1188,6 @@
     .after {
       flex-direction: column;
     }
-  
-    .countdown {
-      font-size: 80px;
-    }
   }
   
   .btn.loading {
@@ -1415,6 +1406,15 @@
     background-repeat: no-repeat, repeat-y;
   }
   
+  /* Layout 6 Grid */
+  .layout-6grid {
+    background: 
+      linear-gradient(180deg, 
+        transparent 32%, var(--border) 32%, var(--border) 34%, transparent 34%,
+        transparent 66%, var(--border) 66%, var(--border) 68%, transparent 68%),
+      linear-gradient(90deg, transparent 49%, var(--border) 49%, var(--border) 51%, transparent 51%);
+  }
+  
   .layout-title { 
     text-align: center; 
     font-weight: 700; 
@@ -1442,41 +1442,6 @@
     display: block; 
     aspect-ratio: 16/9; 
     object-fit: cover; 
-  }
-  
-  .countdown {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 140px; 
-    font-weight: 900;
-    color: #fff; 
-    text-shadow: 0 8px 32px rgba(0,0,0,0.8); 
-    background: rgba(0,0,0,0.5);
-    z-index: 10;
-    line-height: 1;
-    animation: countdownPulse 1s ease-in-out;
-  }
-  
-  @keyframes countdownPulse {
-    0% { 
-      transform: scale(0.8); 
-      opacity: 0.5;
-    }
-    50% { 
-      transform: scale(1.2); 
-      opacity: 1;
-    }
-    100% { 
-      transform: scale(1); 
-      opacity: 1;
-    }
-  }
-  
-  .hidden { 
-    display: none !important; 
   }
   
   .cam-side { 
@@ -1617,59 +1582,9 @@
     object-fit: cover; 
   }
   
-  .btn { 
-    padding: 10px 14px; 
-    border: 0; 
-    border-radius: 10px; 
-    background: var(--text); 
-    color: #fff; 
-    font-weight: 700; 
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,.15);
-  }
-  
-  .btn:active {
-    transform: translateY(0);
-  }
-  
-  .btn.secondary { 
-    background: var(--p5); 
-    color: var(--text); 
-  }
-  
-  .btn.ok { 
-    background: var(--ok); 
-    color: #fff; 
-  }
-  
-  .btn.danger { 
-    background: var(--err); 
-    color: #fff; 
-  }
-  
   .btn.thin { 
     padding: 8px 10px; 
     font-size: 14px;
-  }
-  
-  .btn.full { 
-    width: 100%; 
-  }
-  
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  .btn:disabled:hover {
-    transform: none;
-    box-shadow: none;
   }
   
   .step-actions { 
@@ -1679,32 +1594,281 @@
     flex-wrap: wrap; 
   }
   
-  @media (max-width: 900px) {
-    .cam-area, .editor { 
-      grid-template-columns: 1fr; 
+  /* =========================================================
+     PHOTOBOOTH - Enhanced Controls
+     ========================================================= */
+  
+  /* Control Section */
+  .control-section {
+    margin-bottom: 16px;
+  }
+  
+  .control-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 14px;
+  }
+  
+  /* Joystick Control */
+  .joystick-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--p5);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  
+  .joy-middle {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .joy-btn {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  
+  .joy-btn:hover {
+    background: var(--text);
+    color: white;
+    transform: scale(1.05);
+    border-color: var(--text);
+  }
+  
+  .joy-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .joy-center {
+    background: var(--p2);
+    border-color: var(--p3);
+  }
+  
+  .joy-center:hover {
+    background: var(--primary);
+  }
+  
+  /* Control with +/- Buttons */
+  .control-with-buttons {
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .ctrl-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .ctrl-btn:hover {
+    background: var(--text);
+    color: white;
+    border-color: var(--text);
+    transform: scale(1.05);
+  }
+  
+  .ctrl-btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Range Slider Enhanced */
+  .control-with-buttons input[type="range"] {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--p2);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  
+  .control-with-buttons input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  
+  .control-with-buttons input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1);
+  }
+  
+  .control-with-buttons input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+  }
+  
+  .control-with-buttons input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1);
+  }
+  
+  /* Mirror preview kamera di Step 2 */
+  #video.mirrored {
+    transform: scaleX(-1);
+  }
+  
+  /* Filter panel */
+  .filters-panel {
+    display: grid;
+    gap: .6rem;
+    padding: .75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .75rem;
+    background: #fafafa;
+  }
+  .filters-panel .f-row {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: .5rem;
+    align-items: center;
+  }
+  .filters-panel .btn.tiny {
+    font-size: .8rem;
+    padding: .3rem .6rem;
+  }
+  
+  /* =========================================================
+     RESPONSIVE - Tablet & Mobile
+     ========================================================= */
+  
+  /* Tablet */
+  @media (max-width: 1024px) {
+    .cam-area {
+      grid-template-columns: 1fr 280px;
     }
-    
-    .editor {
-      gap: 20px;
+  
+    .live-box {
+      min-height: 400px;
     }
-    
-    .stage-wrap {
-      max-width: 500px;
-      margin: 0 auto;
+  
+    #video {
+      min-height: 400px;
     }
   }
   
-  @media (max-width: 600px) {
+  /* Mobile */
+  @media (max-width: 768px) {
+    .cam-area {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  
+    .live-box {
+      min-height: 500px;
+      max-width: 100%;
+    }
+  
+    #video {
+      min-height: 500px;
+      max-height: 70vh;
+    }
+  
+    .cam-side {
+      max-width: 100%;
+    }
+  
+    .captured-grid {
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    }
+  
+    .editor {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  
+    .stage-wrap {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+  
+    .panel {
+      width: 100%;
+    }
+  
+    /* Joystick lebih besar di mobile */
+    .joy-btn {
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+    }
+  
+    .ctrl-btn {
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+    }
+  
     .layout-grid {
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
-    
+  
     .layout-visual {
-      height: 120px;
+      height: 140px;
     }
-    
-    .countdown {
-      font-size: 80px;
+  }
+  
+  /* Small Mobile */
+  @media (max-width: 480px) {
+    .live-box {
+      min-height: 400px;
+    }
+  
+    #video {
+      min-height: 400px;
+    }
+  
+    .thumb-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  
+    .joystick-control {
+      padding: 16px;
+    }
+  
+    .joy-btn {
+      width: 52px;
+      height: 52px;
     }
   }
   
@@ -1713,38 +1877,3 @@
      ========================================================= */
   .text-center { text-align: center; }
   .hidden { display: none !important; }
-
-
-  /* Mirror preview kamera di Step 2 */
-#video.mirrored {
-  transform: scaleX(-1);
-}
-
-
-
-/* Mirror untuk preview kamera & playback */
-#live.mirrored,
-#playback.mirrored {
-  transform: scaleX(-1);
-}
-
-
-
-.filters-panel {
-  display: grid;
-  gap: .6rem;
-  padding: .75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: .75rem;
-  background: #fafafa;
-}
-.filters-panel .f-row {
-  display: grid;
-  grid-template-columns: 120px 1fr auto;
-  gap: .5rem;
-  align-items: center;
-}
-.filters-panel .btn.tiny {
-  font-size: .8rem;
-  padding: .3rem .6rem;
-}
