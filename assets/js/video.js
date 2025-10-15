@@ -1,14 +1,13 @@
 // assets/js/video.js
-// Video Booth: Mirror + Filters + ZIP/PDF
-// Pastikan file ini di-load sebagai type="module" di HTML
+// Video Booth: 3:2 Output + Mirror + Filters + ZIP/PDF
 import { Filters } from './filters.js';
 
 (() => {
-  // 📐 Konstanta
-  const FRAME_W = 360;
-  const FRAME_H = 270;
+  // 📐 Konstanta - RASIO 3:2 (Landscape)
+  const FRAME_W = 540;  // 3:2 ratio
+  const FRAME_H = 360;
   const JPEG_QUALITY = 1;
-  const PAGE_W = 595; // A4 px (portrait)
+  const PAGE_W = 595; 
   const PAGE_H = 842;
 
   // Elemen
@@ -34,26 +33,61 @@ import { Filters } from './filters.js';
   const presetWrap = document.getElementById('presetFrames');
   const btnNoFrame = document.getElementById('btnNoFrame');
 
-  // ---- Mirror preview ----
-  const mirrorBtn =
-    document.querySelector('.vid-left #backTo1') ||
-    [...document.querySelectorAll('.vid-left .btn')].find(b =>
-      b.textContent.trim().toLowerCase().includes('mirror kamera')
-    );
+  // ---- Mirror preview - Fix untuk preview kamera ----
+  const mirrorBtn = document.getElementById('backTo1');
+  // isMirrored sudah di-declare di global state
 
-  let isMirrored = false;
+  // Function untuk apply mirror secara paksa
+  function applyMirrorState() {
+    if (isMirrored) {
+      live.style.transform = 'scaleX(-1)';
+      playback.style.transform = 'scaleX(-1)';
+    } else {
+      live.style.transform = '';
+      playback.style.transform = '';
+    }
+  }
 
-  mirrorBtn?.addEventListener('click', () => {
-    isMirrored = !isMirrored;
-    live.classList.toggle('mirrored', isMirrored);
-    playback.classList.toggle('mirrored', isMirrored);
-    mirrorBtn.classList.toggle('active', isMirrored);
-    // apply ulang CSS filter biar konsisten
-    Filters.applyCSSTo(live);
-    Filters.applyCSSTo(playback);
-  });
+  if (mirrorBtn) {
+    mirrorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      isMirrored = !isMirrored;
+      
+      console.log('Mirror clicked, new state:', isMirrored);
+      
+      // Toggle class pada video elements
+      live.classList.toggle('mirrored', isMirrored);
+      playback.classList.toggle('mirrored', isMirrored);
+      
+      // Apply mirror dengan inline style (lebih kuat dari CSS)
+      applyMirrorState();
+      
+      // Toggle active state pada button
+      mirrorBtn.classList.toggle('active', isMirrored);
+      
+      // Update text button
+      mirrorBtn.textContent = isMirrored ? '🪞 Mirror: ON' : '🪞 Mirror Kamera';
+      
+      console.log('Mirror applied to video elements');
+    });
+    
+    console.log('Mirror button initialized:', mirrorBtn);
+  } else {
+    console.error('Mirror button #backTo1 not found!');
+  }
 
-  // ===== Filters Panel (dibuat otomatis di sisi kanan)
+  // ===== Filters Panel (dengan mirror preservation)
+  // Define applyMirrorState function di sini juga untuk dipakai di callback
+  function applyMirrorState() {
+    if (isMirrored) {
+      live.style.transform = 'scaleX(-1)';
+      playback.style.transform = 'scaleX(-1)';
+    } else {
+      live.style.transform = '';
+      playback.style.transform = '';
+    }
+  }
+  
   (() => {
     const sideRight = document.querySelector('.vid-right');
     if (sideRight) {
@@ -61,10 +95,17 @@ import { Filters } from './filters.js';
       panel.id = 'filterPanel';
       panel.style.marginTop = '1rem';
       sideRight.insertBefore(panel, sideRight.firstChild);
+      
+      // Build panel dengan callback yang preserve mirror
       Filters.buildPanel(panel, () => {
         Filters.applyCSSTo(live);
         Filters.applyCSSTo(playback);
+        
+        // CRITICAL: Restore mirror state setelah filter apply
+        applyMirrorState();
       });
+      
+      // Initial apply
       Filters.applyCSSTo(live);
     }
   })();
@@ -106,9 +147,23 @@ import { Filters } from './filters.js';
   let framesData = [];
   let frameOverlayImage = null;
   let isCountingDown = false;
+  let isMirrored = false; // Global mirror state
 
   // ==============================
-  // Supabase helpers (optional upload frame)
+  // Mirror Helper Function
+  // ==============================
+  function applyMirrorState() {
+    if (isMirrored) {
+      live.style.transform = 'scaleX(-1)';
+      playback.style.transform = 'scaleX(-1)';
+    } else {
+      live.style.transform = '';
+      playback.style.transform = '';
+    }
+  }
+
+  // ==============================
+  // Supabase helpers
   // ==============================
   async function requireAuthUser() {
     const { data: { user } } = await window.sb.auth.getUser();
@@ -247,12 +302,12 @@ import { Filters } from './filters.js';
   // Opsi Rekam
   // ==============================
   optA.onclick = () => {
-    recordDuration = 10; recordFps = 6;
-    setStatus('Opsi A: 10s @6fps (60 foto)');
+    recordDuration = 10; recordFps = 8;
+    setStatus('Opsi A: 10s @8fps (80 foto)');
   };
   optB.onclick = () => {
-    recordDuration = 20; recordFps = 3;
-    setStatus('Opsi B: 20s @3fps (60 foto)');
+    recordDuration = 20; recordFps = 4;
+    setStatus('Opsi B: 20s @4fps (80 foto)');
   };
 
   // ==============================
@@ -262,7 +317,7 @@ import { Filters } from './filters.js';
   frameInput.onchange = async () => {
     const file = frameInput.files?.[0];
     if (!file) return;
-    await uploadFrameToBucket(file); // optional
+    await uploadFrameToBucket(file);
     const img = new Image();
     img.onload = () => {
       frameOverlayImage = img;
@@ -331,7 +386,6 @@ import { Filters } from './filters.js';
       downloadPdf.disabled = false;
       retakeBtn.disabled = false;
       setStatus('Rekaman selesai! Silakan download ZIP atau PDF');
-      // Tampilkan filter di playback juga
       Filters.applyCSSTo(playback);
       playback.classList.toggle('mirrored', isMirrored);
     };
@@ -371,7 +425,7 @@ import { Filters } from './filters.js';
   };
 
   // ==============================
-  // Ekstrak Frame (mirror + filters baked)
+  // Ekstrak Frame 3:2 (mirror + filters baked)
   // ==============================
   async function fastExtract(blob, fps) {
     setStatus('Mengekstrak frame dari video...');
@@ -384,9 +438,10 @@ import { Filters } from './filters.js';
 
     const totalFrames = Math.min(Math.floor(dur * fps), fps * recordDuration);
 
-    // canvas output final
+    // canvas output final 3:2
     const canvas = document.createElement('canvas');
-    canvas.width = FRAME_W; canvas.height = FRAME_H;
+    canvas.width = FRAME_W; 
+    canvas.height = FRAME_H;
 
     const frames = [];
     showProgress(true);
@@ -398,14 +453,31 @@ import { Filters } from './filters.js';
 
       const vw = video.videoWidth, vh = video.videoHeight;
 
-      // 1) crop ke tempSrc (FRAME_W x FRAME_H), sekaligus mirror bila perlu
-      const tempSrc = document.createElement('canvas');
-      tempSrc.width = FRAME_W; tempSrc.height = FRAME_H;
-      const sctx = tempSrc.getContext('2d');
+      // 1) Crop video ke 3:2 dengan center crop
+      const targetRatio = FRAME_W / FRAME_H; // 3:2 = 1.5
+      const videoRatio = vw / vh;
 
-      const s = Math.max(FRAME_W / vw, FRAME_H / vh);
-      const sw = FRAME_W / s, sh = FRAME_H / s;
-      const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+      let sw, sh, sx, sy;
+      
+      if (videoRatio > targetRatio) {
+        // Video lebih lebar, crop kiri-kanan
+        sh = vh;
+        sw = vh * targetRatio;
+        sx = (vw - sw) / 2;
+        sy = 0;
+      } else {
+        // Video lebih tinggi, crop atas-bawah
+        sw = vw;
+        sh = vw / targetRatio;
+        sx = 0;
+        sy = (vh - sh) / 2;
+      }
+
+      // 2) Draw ke tempSrc dengan mirror bila perlu
+      const tempSrc = document.createElement('canvas');
+      tempSrc.width = FRAME_W; 
+      tempSrc.height = FRAME_H;
+      const sctx = tempSrc.getContext('2d');
 
       sctx.save();
       if (isMirrored) {
@@ -415,10 +487,10 @@ import { Filters } from './filters.js';
       sctx.drawImage(video, sx, sy, sw, sh, 0, 0, FRAME_W, FRAME_H);
       sctx.restore();
 
-      // 2) bake filter + vignette/grain ke canvas output
+      // 3) Bake filter ke canvas output
       Filters.bakeToCanvas(canvas, tempSrc);
 
-      // 3) overlay frame png jika ada
+      // 4) Overlay frame png jika ada
       if (frameOverlayImage) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(frameOverlayImage, 0, 0, FRAME_W, FRAME_H);
@@ -467,7 +539,7 @@ import { Filters } from './filters.js';
   };
 
   // ==============================
-  // Download PDF (6 per halaman)
+  // Download PDF (8 foto per halaman, 3:2 ratio - 2x4 grid)
   // ==============================
   downloadPdf.onclick = async () => {
     if (!recordedBlob) return alert('Rekam video dulu');
@@ -483,23 +555,47 @@ import { Filters } from './filters.js';
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [PAGE_W, PAGE_H] });
 
-    const cols = 2, rows = 3;
-    const margin = 15, gapX = 10, gapY = 10;
-    const availableW = PAGE_W - 2 * margin - gapX;
-    const availableH = PAGE_H - 2 * margin - 2 * gapY;
+    // Layout: 8 foto per halaman (2 kolom x 4 baris)
+    const cols = 2;
+    const rows = 4;
+    const photosPerPage = cols * rows; // 8 foto
+    
+    const margin = 12;
+    const gapX = 8;
+    const gapY = 6;
+    
+    const availableW = PAGE_W - (2 * margin) - (cols - 1) * gapX;
+    const availableH = PAGE_H - (2 * margin) - (rows - 1) * gapY;
+    
+    // Hitung ukuran foto dengan rasio 3:2
     const imgW = availableW / cols;
-    const imgH = availableH / rows;
+    const imgH = imgW / 1.5; // 3:2 ratio
+    
+    // Cek apakah tinggi muat, jika tidak scale down
+    const totalHeight = rows * imgH + (rows - 1) * gapY;
+    let finalImgW = imgW;
+    let finalImgH = imgH;
+    
+    if (totalHeight > availableH) {
+      const scale = availableH / totalHeight;
+      finalImgW = imgW * scale;
+      finalImgH = imgH * scale;
+    }
 
     showProgress(true);
 
     for (let i = 0; i < framesData.length; i++) {
-      if (i > 0 && i % 6 === 0) pdf.addPage([PAGE_W, PAGE_H]);
+      // Tambah halaman baru setiap 8 foto
+      if (i > 0 && i % photosPerPage === 0) {
+        pdf.addPage([PAGE_W, PAGE_H]);
+      }
 
-      const posInPage = i % 6;
-      const col = posInPage % 2;
-      const row = Math.floor(posInPage / 2);
-      const x = margin + col * (imgW + gapX);
-      const y = margin + row * (imgH + gapY);
+      const posInPage = i % photosPerPage;
+      const col = posInPage % cols;
+      const row = Math.floor(posInPage / cols);
+      
+      const x = margin + col * (finalImgW + gapX);
+      const y = margin + row * (finalImgH + gapY);
 
       const frBlob = framesData[i];
       const frUrl = URL.createObjectURL(frBlob);
@@ -513,34 +609,43 @@ import { Filters } from './filters.js';
       await new Promise((res) => { img.onload = res; img.src = frUrl; });
       tempCtx.drawImage(img, 0, 0, FRAME_W, FRAME_H);
 
-      // nomor kecil
+      // Nomor urut di kanan bawah
       const frameNum = i + 1;
-      tempCtx.font = 'bold px Arial';
+      tempCtx.font = 'bold 22px Arial';
       tempCtx.textAlign = 'right';
       tempCtx.textBaseline = 'bottom';
       const numText = String(frameNum);
       const metrics = tempCtx.measureText(numText);
-      const pad = 1;
+      const pad = 6;
       const bgX = FRAME_W - metrics.width - pad * 2;
-      const bgY = FRAME_H - 30;
+      const bgY = FRAME_H - 28;
       const bgW = metrics.width + pad * 2;
-      const bgH = 26;
-      tempCtx.fillStyle = 'rgba(0,0,0,0.7)';
+      const bgH = 24;
+      
+      tempCtx.fillStyle = 'rgba(0,0,0,0.75)';
       tempCtx.fillRect(bgX, bgY, bgW, bgH);
-      tempCtx.fillStyle = '#fff';
-      tempCtx.fillText(numText, FRAME_W - pad, FRAME_H - 8);
+      tempCtx.fillStyle = '#ffffff';
+      tempCtx.fillText(numText, FRAME_W - pad, FRAME_H - 6);
 
       const imgData = tempCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
-      pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
+      pdf.addImage(imgData, 'JPEG', x, y, finalImgW, finalImgH);
 
       URL.revokeObjectURL(frUrl);
-      setProgress(Math.round(((i + 1) / framesData.length) * 100), `PDF ${i + 1}/${framesData.length}`);
+      
+      const currentPage = Math.floor(i / photosPerPage) + 1;
+      const totalPages = Math.ceil(framesData.length / photosPerPage);
+      setProgress(
+        Math.round(((i + 1) / framesData.length) * 100), 
+        `PDF: Foto ${i + 1}/${framesData.length} | Hal ${currentPage}/${totalPages}`
+      );
     }
 
     const pdfBlob = pdf.output('blob');
     saveAs(pdfBlob, `${getFileName('MOTIONME')}.pdf`);
     showProgress(false);
-    setStatus('PDF berhasil didownload ✅');
+    
+    const totalPages = Math.ceil(framesData.length / photosPerPage);
+    setStatus(`PDF berhasil! ${framesData.length} foto dalam ${totalPages} halaman (8 foto/hal) ✅`);
   };
 
   // ==============================
@@ -551,390 +656,3 @@ import { Filters } from './filters.js';
     setStatus('Pilih kamera dan opsi rekaman');
   })();
 })();
-
-
-
-
-
-
-
-
-
-// (async function(){
-//   // 📸 Ukuran untuk A4 landscape dengan 6 foto
-//   const FRAME_W = 360;
-//   const FRAME_H = 270;
-//   const JPEG_QUALITY = 0.92;
-
-//   // A4 dalam pixel (portrait)
-//   const PAGE_W = 595;
-//   const PAGE_H = 842;
-
-//   const live = document.getElementById('live');
-//   const playback = document.getElementById('playback');
-//   const startRec = document.getElementById('startRec');
-//   const stopRec = document.getElementById('stopRec');
-//   const optA = document.getElementById('optA');
-//   const optB = document.getElementById('optB');
-//   const downloadZip = document.getElementById('downloadZip');
-//   const downloadPdf = document.getElementById('downloadPdf');
-//   const retakeBtn = document.getElementById('retake');
-//   const cameraBtns = document.getElementById('cameraBtns');
-//   const timerEl = document.getElementById('timer');
-//   const statusEl = document.getElementById('status');
-//   const progressWrap = document.getElementById('progressWrap');
-//   const progressBar = document.getElementById('progressBar');
-//   const progressText = document.getElementById('progressText');
-//   const frameInput = document.getElementById('frameInput');
-//   const framePreview = document.getElementById('framePreview');
-
-//   let mediaStream=null, mediaRecorder=null, recordedChunks=[], recordedBlob=null;
-//   let recordDuration=0, recordFps=3, elapsed=0, timerInterval=null;
-//   let framesData=[];
-//   let frameOverlayImage=null;
-
-//   function setStatus(msg){ statusEl.textContent = msg; }
-//   function showProgress(show){
-//     progressWrap.style.display = show ? 'block' : 'none';
-//     if(!show){
-//       progressBar.style.width='0%';
-//       progressText.textContent='';
-//     }
-//   }
-//   function setProgress(p,text=''){
-//     progressBar.style.width = `${p}%`;
-//     progressText.textContent = text;
-//   }
-
-//   // ⏰ Nama file MOTIONME-JAM-TANGGAL-BULAN-TAHUN
-//   function getFileName(prefix){
-//     const d=new Date();
-//     const jam=String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
-//     const tgl=String(d.getDate()).padStart(2,'0');
-//     const bln=String(d.getMonth()+1).padStart(2,'0');
-//     const thn=d.getFullYear();
-//     return `${prefix}-${jam}-${tgl}-${bln}-${thn}`;
-//   }
-
-//   // 🎥 List kamera
-//   async function listCameras(){
-//     try{
-//       await navigator.mediaDevices.getUserMedia({video:true});
-//     }catch(e){
-//       console.log('Permission request:', e);
-//     }
-//     const devices=await navigator.mediaDevices.enumerateDevices();
-//     const cams=devices.filter(d=>d.kind==='videoinput');
-//     cameraBtns.innerHTML='';
-//     cams.forEach((cam,idx)=>{
-//       const btn=document.createElement('button');
-//       btn.textContent=cam.label||`Kamera ${idx+1}`;
-//       btn.className='secondary';
-//       btn.onclick=()=>selectCamera(cam.deviceId,btn.textContent);
-//       cameraBtns.appendChild(btn);
-//     });
-//   }
-
-//   async function selectCamera(id,label){
-//     if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
-//     mediaStream=await navigator.mediaDevices.getUserMedia({
-//       video:{
-//         deviceId:{exact:id},
-//         width:{ideal:1280},
-//         height:{ideal:720}
-//       }
-//     });
-//     live.srcObject=mediaStream;
-//     setStatus(`Kamera aktif: ${label}`);
-//     startRec.disabled=false;
-//   }
-
-//   optA.onclick=()=>{
-//     recordDuration=10;
-//     recordFps=6;
-//     setStatus('Opsi A: 10s @6fps (60 foto)');
-//   }
-
-//   optB.onclick=()=>{
-//     recordDuration=20;
-//     recordFps=3;
-//     setStatus('Opsi B: 20s @3fps (60 foto)');
-//   }
-
-//   // ⏺️ Rekam
-//   startRec.onclick=()=>{
-//     if(!mediaStream||!recordDuration){
-//       alert('Pilih kamera & opsi dulu');
-//       return;
-//     }
-//     recordedChunks=[];
-//     framesData=[];
-
-//     try{
-//       mediaRecorder=new MediaRecorder(mediaStream,{mimeType:'video/webm;codecs=vp8'});
-//     }catch(e){
-//       mediaRecorder=new MediaRecorder(mediaStream);
-//     }
-
-//     mediaRecorder.ondataavailable=e=>{
-//       if(e.data.size) recordedChunks.push(e.data);
-//     }
-
-//     mediaRecorder.onstop=()=>{
-//       recordedBlob=new Blob(recordedChunks,{type:'video/webm'});
-//       playback.src=URL.createObjectURL(recordedBlob);
-//       playback.style.display='block';
-//       downloadZip.disabled=false;
-//       downloadPdf.disabled=false;
-//       retakeBtn.disabled=false;
-//       setStatus('Rekaman selesai! Silakan download ZIP atau PDF');
-//     };
-
-//     mediaRecorder.start(100);
-//     startRec.disabled=true;
-//     stopRec.disabled=false;
-//     elapsed=0;
-//     timerEl.textContent=`Detik: ${elapsed}/${recordDuration}`;
-
-//     timerInterval=setInterval(()=>{
-//       elapsed++;
-//       timerEl.textContent=`Detik: ${elapsed}/${recordDuration}`;
-//       if(elapsed>=recordDuration){
-//         stopRec.click();
-//       }
-//     },1000);
-//   };
-
-//   stopRec.onclick=()=>{
-//     if(mediaRecorder&&mediaRecorder.state==='recording') mediaRecorder.stop();
-//     clearInterval(timerInterval);
-//     startRec.disabled=false;
-//     stopRec.disabled=true;
-//   };
-
-//   retakeBtn.onclick=()=>{
-//     recordedChunks=[];
-//     framesData=[];
-//     recordedBlob=null;
-//     playback.style.display='none';
-//     playback.src='';
-//     downloadZip.disabled=true;
-//     downloadPdf.disabled=true;
-//     retakeBtn.disabled=true;
-//     timerEl.textContent='Detik: 0 / 0';
-//     setStatus('Siap untuk rekam ulang');
-
-//     // ADDED: reset flag charge agar sesi rekam berikutnya memotong token lagi
-//     if (window.resetDownloadCharge) window.resetDownloadCharge();
-//   };
-
-//   // 📥 Load frame.png
-//   frameInput.onchange=()=>{
-//     const file=frameInput.files[0];
-//     if(file){
-//       const img=new Image();
-//       img.onload=()=>{
-//         frameOverlayImage=img;
-//         framePreview.src=img.src;
-//         framePreview.style.display='block';
-//         setStatus('Frame.png dimuat ✅ (akan dioverlay ke semua foto)');
-//       };
-//       img.src=URL.createObjectURL(file);
-//     }
-//   };
-
-//   // 🖼️ Ekstraksi frame dari video
-//   async function fastExtract(blob,fps){
-//     setStatus('Mengekstrak frame dari video...');
-//     const video=document.createElement('video');
-//     video.src=URL.createObjectURL(blob);
-
-//     await new Promise(r=>video.onloadedmetadata=r);
-
-//     let dur=video.duration;
-//     if(!isFinite(dur)||dur>600){
-//       dur=recordDuration;
-//     }
-
-//     const totalFrames=Math.min(Math.floor(dur*fps), fps*recordDuration);
-//     const canvas=document.createElement('canvas');
-//     canvas.width=FRAME_W;
-//     canvas.height=FRAME_H;
-//     const ctx=canvas.getContext('2d');
-//     const frames=[];
-
-//     showProgress(true);
-
-//     for(let i=0;i<totalFrames;i++){
-//       const t=i/fps;
-//       video.currentTime=t;
-//       await new Promise(r=>video.onseeked=r);
-
-//       ctx.clearRect(0,0,FRAME_W,FRAME_H);
-
-//       // Draw video dengan crop center
-//       const vw=video.videoWidth, vh=video.videoHeight;
-//       const s=Math.max(FRAME_W/vw,FRAME_H/vh);
-//       const sw=FRAME_W/s, sh=FRAME_H/s;
-//       const sx=(vw-sw)/2, sy=(vh-sh)/2;
-//       ctx.drawImage(video,sx,sy,sw,sh,0,0,FRAME_W,FRAME_H);
-
-//       // Jika ada frame overlay, gambar di atas foto
-//       if(frameOverlayImage){
-//         ctx.drawImage(frameOverlayImage,0,0,FRAME_W,FRAME_H);
-//       }
-
-//       const blobFrame=await new Promise(res=>canvas.toBlob(res,'image/jpeg',JPEG_QUALITY));
-//       frames.push(blobFrame);
-
-//       setProgress(Math.round(((i+1)/totalFrames)*100),`Frame ${i+1}/${totalFrames}`);
-//       await new Promise(requestAnimationFrame);
-//     }
-
-//     showProgress(false);
-//     return frames;
-//   }
-
-//   // ZIP download
-//   downloadZip.onclick=async()=>{
-//     if(!recordedBlob){
-//       alert('Rekam video dulu');
-//       return;
-//     }
-
-//     // ADDED: potong token sekali saat download pertama pada sesi rekam ini
-//     if (window.consumeOnFirstDownload) {
-//       const ok = await window.consumeOnFirstDownload('video');
-//       if (!ok) return; // batal jika token habis / gagal charge
-//     }
-
-//     setStatus('Membuat ZIP...');
-//     framesData=await fastExtract(recordedBlob,recordFps);
-
-//     const zip=new JSZip();
-//     const folder=zip.folder(getFileName('MOTIONME'));
-
-//     showProgress(true);
-//     for(let i=0;i<framesData.length;i++){
-//       const b=framesData[i];
-//       const buf=await b.arrayBuffer();
-//       folder.file(`frame_${String(i+1).padStart(4,'0')}.jpg`,buf);
-//       setProgress(Math.round(((i+1)/framesData.length)*100),`ZIP ${i+1}/${framesData.length}`);
-//     }
-
-//     const blob=await zip.generateAsync({type:'blob'});
-//     saveAs(blob,`${getFileName('MOTIONME')}.zip`);
-//     showProgress(false);
-//     setStatus('ZIP berhasil didownload ✅');
-//   };
-
-//   // PDF download (6 foto per halaman, 2 kolom x 3 baris)
-//   downloadPdf.onclick=async()=>{
-//     if(!recordedBlob){
-//       alert('Rekam video dulu');
-//       return;
-//     }
-
-//     // ADDED: potong token sekali saat download pertama pada sesi rekam ini
-//     if (window.consumeOnFirstDownload) {
-//       const ok = await window.consumeOnFirstDownload('video');
-//       if (!ok) return; // batal jika token habis / gagal charge
-//     }
-
-//     setStatus('Membuat PDF...');
-
-//     if(framesData.length===0){
-//       framesData=await fastExtract(recordedBlob,recordFps);
-//     }
-
-//     const { jsPDF } = window.jspdf;
-//     const pdf=new jsPDF({
-//       orientation: 'portrait',
-//       unit:'px',
-//       format:[PAGE_W,PAGE_H]
-//     });
-
-//     const cols=2, rows=3;
-//     const margin=15;
-//     const gapX=10;
-//     const gapY=10;
-
-//     const availableW = PAGE_W - (2*margin) - gapX;
-//     const availableH = PAGE_H - (2*margin) - (2*gapY);
-
-//     const imgW = availableW / cols;
-//     const imgH = availableH / rows;
-
-//     const total=framesData.length;
-
-//     showProgress(true);
-
-//     for(let i=0;i<total;i++){
-//       // Tambah halaman baru setiap 6 foto
-//       if(i>0 && i%6===0){
-//         pdf.addPage([PAGE_W,PAGE_H]);
-//       }
-
-//       const posInPage = i % 6;
-//       const col = posInPage % 2;
-//       const row = Math.floor(posInPage / 2);
-
-//       const x = margin + col * (imgW + gapX);
-//       const y = margin + row * (imgH + gapY);
-
-//       const frBlob=framesData[i];
-//       const frUrl=URL.createObjectURL(frBlob);
-
-//       // Convert blob ke base64 untuk jsPDF + nomor urut
-//       const tempCanvas = document.createElement('canvas');
-//       tempCanvas.width = FRAME_W;
-//       tempCanvas.height = FRAME_H;
-//       const tempCtx = tempCanvas.getContext('2d');
-
-//       // Gambar foto
-//       const img = new Image();
-//       await new Promise((resolve)=>{
-//         img.onload = resolve;
-//         img.src = frUrl;
-//       });
-//       tempCtx.drawImage(img, 0, 0, FRAME_W, FRAME_H);
-
-//       // Tambahkan nomor urut
-//       const frameNum = i + 1;
-//       tempCtx.font = 'bold 20px Arial';
-//       tempCtx.textAlign = 'right';
-//       tempCtx.textBaseline = 'bottom';
-
-//       // Background hitam semi-transparan untuk nomor
-//       const numText = String(frameNum);
-//       const textMetrics = tempCtx.measureText(numText);
-//       const padding = 8;
-//       const bgX = FRAME_W - textMetrics.width - padding * 2;
-//       const bgY = FRAME_H - 30;
-//       const bgW = textMetrics.width + padding * 2;
-//       const bgH = 26;
-
-//       tempCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-//       tempCtx.fillRect(bgX, bgY, bgW, bgH);
-
-//       // Teks putih untuk nomor
-//       tempCtx.fillStyle = '#ffffff';
-//       tempCtx.fillText(numText, FRAME_W - padding, FRAME_H - 8);
-
-//       const imgData = tempCanvas.toDataURL('image/jpeg', JPEG_QUALITY);
-//       pdf.addImage(imgData,'JPEG',x,y,imgW,imgH);
-
-//       URL.revokeObjectURL(frUrl);
-//       setProgress(Math.round(((i+1)/total)*100),`PDF ${i+1}/${total}`);
-//     }
-
-//     const pdfBlob=pdf.output('blob');
-//     saveAs(pdfBlob,`${getFileName('MOTIONME')}.pdf`);
-//     showProgress(false);
-//     setStatus('PDF berhasil didownload ✅');
-//   };
-
-//   // Initialize
-//   await listCameras();
-//   setStatus('Pilih kamera dan opsi rekaman');
-// })();
