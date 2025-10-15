@@ -1,5 +1,5 @@
 // assets/js/photo.js  (module)
-// Photobooth: Mirror + Filters + Enhanced Controls
+// Photobooth: Square 1:1 output + Mirror + Filters + Enhanced Controls
 import { Filters } from './filters.js';
 
 const $ = (s) => document.querySelector(s);
@@ -162,8 +162,10 @@ btnCapture.addEventListener('click', async () => {
   const vw = video.videoWidth || 1280;
   const vh = video.videoHeight || 720;
 
+  // Step 1: Draw video to temp canvas with mirror
   const tempSrc = document.createElement('canvas');
-  tempSrc.width = vw; tempSrc.height = vh;
+  tempSrc.width = vw; 
+  tempSrc.height = vh;
   const sctx = tempSrc.getContext('2d');
 
   sctx.save();
@@ -174,13 +176,32 @@ btnCapture.addEventListener('click', async () => {
   sctx.drawImage(video, 0, 0, vw, vh);
   sctx.restore();
 
-  Filters.bakeToCanvas(hiddenCanvas, tempSrc);
+  // Step 2: Crop to 1:1 square (center crop)
+  const size = Math.min(vw, vh);
+  const offsetX = (vw - size) / 2;
+  const offsetY = (vh - size) / 2;
 
+  const squareCanvas = document.createElement('canvas');
+  squareCanvas.width = size;
+  squareCanvas.height = size;
+  const sqCtx = squareCanvas.getContext('2d');
+  
+  // Draw cropped square from tempSrc
+  sqCtx.drawImage(tempSrc, offsetX, offsetY, size, size, 0, 0, size, size);
+
+  // Step 3: Apply filters to square canvas
+  const finalSize = 1080; // target resolution
+  hiddenCanvas.width = finalSize;
+  hiddenCanvas.height = finalSize;
+  Filters.bakeToCanvas(hiddenCanvas, squareCanvas);
+
+  // Step 4: Save as bitmap
   const blob = await new Promise(res => hiddenCanvas.toBlob(res, 'image/jpeg', 0.92));
   const bmp = await createImageBitmap(blob);
   shots[shotCount] = bmp;
   shotCount++;
 
+  // Step 5: Update thumbnail
   const cell = thumbs.querySelector(`.ph[data-i="${shotCount-1}"]`);
   cell.classList.remove('empty');
   cell.innerHTML = '';
@@ -229,8 +250,10 @@ let activeIndex = 0;
 async function initEditor() {
   objects = [];
 
-  stage.width = 720;
-  stage.height = 1080;
+  // SQUARE 1:1 Canvas
+  const canvasSize = 1080;
+  stage.width = canvasSize;
+  stage.height = canvasSize;
 
   selTarget.innerHTML = '';
   for (let i = 0; i < photoCount; i++) {
@@ -260,16 +283,16 @@ async function initEditor() {
 }
 
 function applyLayout() {
-  const cw = stage.width;
-  const ch = stage.height;
+  const size = stage.width; // 1080x1080 square
 
   switch (chosenLayout) {
     case '2row': {
-      const cellH = ch / 2;
+      // 2 foto horizontal (atas-bawah)
+      const cellH = size / 2;
       for (let i = 0; i < 2; i++) {
         const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, cw, cellH);
-        const ox = (cw - fit.w) / 2;
+        const fit = coverFit(bmp.width, bmp.height, size, cellH);
+        const ox = (size - fit.w) / 2;
         const oy = i * cellH + (cellH - fit.h) / 2;
         objects.push({ kind: 'photo', img: bmp, x: ox, y: oy, w: fit.w, h: fit.h, rot: 0 });
       }
@@ -277,11 +300,12 @@ function applyLayout() {
     }
 
     case '3row': {
-      const cellH = ch / 3;
+      // 3 foto horizontal (atas-tengah-bawah)
+      const cellH = size / 3;
       for (let i = 0; i < 3; i++) {
         const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, cw, cellH);
-        const ox = (cw - fit.w) / 2;
+        const fit = coverFit(bmp.width, bmp.height, size, cellH);
+        const ox = (size - fit.w) / 2;
         const oy = i * cellH + (cellH - fit.h) / 2;
         objects.push({ kind: 'photo', img: bmp, x: ox, y: oy, w: fit.w, h: fit.h, rot: 0 });
       }
@@ -289,27 +313,37 @@ function applyLayout() {
     }
 
     case '4grid': {
-      const halfW = cw / 2;
-      const halfH = ch / 2;
+      // 4 foto grid 2x2
+      const cellSize = size / 2;
       const positions = [
-        [0, 0], [halfW, 0],
-        [0, halfH], [halfW, halfH]
+        [0, 0], [cellSize, 0],
+        [0, cellSize], [cellSize, cellSize]
       ];
       for (let i = 0; i < 4; i++) {
         const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, halfW, halfH);
+        const fit = coverFit(bmp.width, bmp.height, cellSize, cellSize);
         const [baseX, baseY] = positions[i];
-        objects.push({ kind: 'photo', img: bmp, x: baseX + (halfW - fit.w) / 2, y: baseY + (halfH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
+        objects.push({ 
+          kind: 'photo', 
+          img: bmp, 
+          x: baseX + (cellSize - fit.w) / 2, 
+          y: baseY + (cellSize - fit.h) / 2, 
+          w: fit.w, 
+          h: fit.h, 
+          rot: 0 
+        });
       }
       break;
     }
 
     case '5mix': {
-      const topH = ch * 0.25;
-      const midH = ch * 0.5;
-      const botH = ch * 0.25;
-      const halfW = cw / 2;
+      // 5 foto: 2 atas (kiri-kanan), 1 tengah (full width), 2 bawah (kiri-kanan)
+      const topH = size * 0.3;
+      const midH = size * 0.4;
+      const botH = size * 0.3;
+      const halfW = size / 2;
 
+      // 2 foto atas
       for (let i = 0; i < 2; i++) {
         const bmp = shots[i];
         const fit = coverFit(bmp.width, bmp.height, halfW, topH);
@@ -317,10 +351,12 @@ function applyLayout() {
         objects.push({ kind: 'photo', img: bmp, x: ox, y: (topH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
       }
 
+      // 1 foto tengah
       const bmp2 = shots[2];
-      const fit2 = coverFit(bmp2.width, bmp2.height, cw, midH);
-      objects.push({ kind: 'photo', img: bmp2, x: (cw - fit2.w) / 2, y: topH + (midH - fit2.h) / 2, w: fit2.w, h: fit2.h, rot: 0 });
+      const fit2 = coverFit(bmp2.width, bmp2.height, size, midH);
+      objects.push({ kind: 'photo', img: bmp2, x: (size - fit2.w) / 2, y: topH + (midH - fit2.h) / 2, w: fit2.w, h: fit2.h, rot: 0 });
 
+      // 2 foto bawah
       for (let i = 3; i < 5; i++) {
         const bmp = shots[i];
         const fit = coverFit(bmp.width, bmp.height, halfW, botH);
@@ -331,8 +367,9 @@ function applyLayout() {
     }
 
     case '6grid': {
-      const cellW = cw / 2;
-      const cellH = ch / 3;
+      // 6 foto grid 2x3
+      const cellW = size / 2;
+      const cellH = size / 3;
       const positions = [
         [0, 0], [cellW, 0],
         [0, cellH], [cellW, cellH],
@@ -342,7 +379,15 @@ function applyLayout() {
         const bmp = shots[i];
         const fit = coverFit(bmp.width, bmp.height, cellW, cellH);
         const [baseX, baseY] = positions[i];
-        objects.push({ kind: 'photo', img: bmp, x: baseX + (cellW - fit.w) / 2, y: baseY + (cellH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
+        objects.push({ 
+          kind: 'photo', 
+          img: bmp, 
+          x: baseX + (cellW - fit.w) / 2, 
+          y: baseY + (cellH - fit.h) / 2, 
+          w: fit.w, 
+          h: fit.h, 
+          rot: 0 
+        });
       }
       break;
     }
@@ -605,9 +650,10 @@ stage.addEventListener('touchmove', (e)=>{
 
 stage.addEventListener('touchend', ()=> drag.on=false);
 
-// ===== Download JPG =====
+// ===== Download JPG (Square 1:1) =====
 btnDownloadJpg.addEventListener('click', async ()=>{
   const out = document.createElement('canvas');
+  // Square output dengan watermark space
   out.width = stage.width;
   out.height = stage.height + 40;
   const c = out.getContext('2d');
@@ -615,6 +661,7 @@ btnDownloadJpg.addEventListener('click', async ()=>{
   c.fillRect(0,0,out.width,out.height);
   c.drawImage(stage, 0, 0);
   
+  // Watermark
   c.fillStyle = '#0b1020';
   c.globalAlpha = 0.6;
   c.font = 'bold 18px system-ui,Segoe UI,Roboto,Arial';
@@ -623,7 +670,7 @@ btnDownloadJpg.addEventListener('click', async ()=>{
   c.globalAlpha = 1;
 
   out.toBlob((blob)=>{
-    saveAs(blob, fileName('Photobooth') + '.jpg');
+    saveAs(blob, fileName('Photobooth-Square') + '.jpg');
   }, 'image/jpeg', 0.92);
 });
 
@@ -643,6 +690,7 @@ function fileName(prefix){
 }
 
 function coverFit(srcW, srcH, dstW, dstH) {
+  // Cover fit: fill entire area, crop excess (no distortion)
   const s = Math.max(dstW/srcW, dstH/srcH);
   return { w: srcW*s, h: srcH*s };
 }
