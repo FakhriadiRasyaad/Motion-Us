@@ -650,7 +650,7 @@ import { Filters } from './filters.js';
 
   // ==============================
   // Init
-  // ==============================
+  // ============================
   (async () => {
     await listCameras();
     setStatus('Pilih kamera dan opsi rekaman');
