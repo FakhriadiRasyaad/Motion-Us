@@ -1,5 +1,5 @@
 // assets/js/video.js
-// Video Booth: 3:2 Output + Mirror + Filters + ZIP/PDF
+// Video Booth: 3:2 Output + Mirror + Filters + ZIP/PDF + GIF (FIXED)
 import { Filters } from './filters.js';
 
 (() => {
@@ -9,6 +9,7 @@ import { Filters } from './filters.js';
   const JPEG_QUALITY = 1;
   const PAGE_W = 595; 
   const PAGE_H = 842;
+  const GIF_DELAY = 125; // 125ms = 8fps untuk GIF
 
   // Elemen
   const live = document.getElementById('live');
@@ -33,11 +34,9 @@ import { Filters } from './filters.js';
   const presetWrap = document.getElementById('presetFrames');
   const btnNoFrame = document.getElementById('btnNoFrame');
 
-  // ---- Mirror preview - Fix untuk preview kamera ----
+  // ---- Mirror preview ----
   const mirrorBtn = document.getElementById('backTo1');
-  // isMirrored sudah di-declare di global state
 
-  // Function untuk apply mirror secara paksa
   function applyMirrorState() {
     if (isMirrored) {
       live.style.transform = 'scaleX(-1)';
@@ -53,41 +52,17 @@ import { Filters } from './filters.js';
       e.preventDefault();
       isMirrored = !isMirrored;
       
-      console.log('Mirror clicked, new state:', isMirrored);
-      
-      // Toggle class pada video elements
       live.classList.toggle('mirrored', isMirrored);
       playback.classList.toggle('mirrored', isMirrored);
       
-      // Apply mirror dengan inline style (lebih kuat dari CSS)
       applyMirrorState();
       
-      // Toggle active state pada button
       mirrorBtn.classList.toggle('active', isMirrored);
-      
-      // Update text button
       mirrorBtn.textContent = isMirrored ? '🪞 Mirror: ON' : '🪞 Mirror Kamera';
-      
-      console.log('Mirror applied to video elements');
     });
-    
-    console.log('Mirror button initialized:', mirrorBtn);
-  } else {
-    console.error('Mirror button #backTo1 not found!');
   }
 
-  // ===== Filters Panel (dengan mirror preservation)
-  // Define applyMirrorState function di sini juga untuk dipakai di callback
-  function applyMirrorState() {
-    if (isMirrored) {
-      live.style.transform = 'scaleX(-1)';
-      playback.style.transform = 'scaleX(-1)';
-    } else {
-      live.style.transform = '';
-      playback.style.transform = '';
-    }
-  }
-  
+  // ===== Filters Panel
   (() => {
     const sideRight = document.querySelector('.vid-right');
     if (sideRight) {
@@ -96,16 +71,12 @@ import { Filters } from './filters.js';
       panel.style.marginTop = '1rem';
       sideRight.insertBefore(panel, sideRight.firstChild);
       
-      // Build panel dengan callback yang preserve mirror
       Filters.buildPanel(panel, () => {
         Filters.applyCSSTo(live);
         Filters.applyCSSTo(playback);
-        
-        // CRITICAL: Restore mirror state setelah filter apply
         applyMirrorState();
       });
       
-      // Initial apply
       Filters.applyCSSTo(live);
     }
   })();
@@ -147,20 +118,7 @@ import { Filters } from './filters.js';
   let framesData = [];
   let frameOverlayImage = null;
   let isCountingDown = false;
-  let isMirrored = false; // Global mirror state
-
-  // ==============================
-  // Mirror Helper Function
-  // ==============================
-  function applyMirrorState() {
-    if (isMirrored) {
-      live.style.transform = 'scaleX(-1)';
-      playback.style.transform = 'scaleX(-1)';
-    } else {
-      live.style.transform = '';
-      playback.style.transform = '';
-    }
-  }
+  let isMirrored = false;
 
   // ==============================
   // Supabase helpers
@@ -385,7 +343,7 @@ import { Filters } from './filters.js';
       downloadZip.disabled = false;
       downloadPdf.disabled = false;
       retakeBtn.disabled = false;
-      setStatus('Rekaman selesai! Silakan download ZIP atau PDF');
+      setStatus('Rekaman selesai! Silakan download ZIP (include GIF) atau PDF');
       Filters.applyCSSTo(playback);
       playback.classList.toggle('mirrored', isMirrored);
     };
@@ -438,7 +396,6 @@ import { Filters } from './filters.js';
 
     const totalFrames = Math.min(Math.floor(dur * fps), fps * recordDuration);
 
-    // canvas output final 3:2
     const canvas = document.createElement('canvas');
     canvas.width = FRAME_W; 
     canvas.height = FRAME_H;
@@ -453,27 +410,23 @@ import { Filters } from './filters.js';
 
       const vw = video.videoWidth, vh = video.videoHeight;
 
-      // 1) Crop video ke 3:2 dengan center crop
-      const targetRatio = FRAME_W / FRAME_H; // 3:2 = 1.5
+      const targetRatio = FRAME_W / FRAME_H;
       const videoRatio = vw / vh;
 
       let sw, sh, sx, sy;
       
       if (videoRatio > targetRatio) {
-        // Video lebih lebar, crop kiri-kanan
         sh = vh;
         sw = vh * targetRatio;
         sx = (vw - sw) / 2;
         sy = 0;
       } else {
-        // Video lebih tinggi, crop atas-bawah
         sw = vw;
         sh = vw / targetRatio;
         sx = 0;
         sy = (vh - sh) / 2;
       }
 
-      // 2) Draw ke tempSrc dengan mirror bila perlu
       const tempSrc = document.createElement('canvas');
       tempSrc.width = FRAME_W; 
       tempSrc.height = FRAME_H;
@@ -487,10 +440,8 @@ import { Filters } from './filters.js';
       sctx.drawImage(video, sx, sy, sw, sh, 0, 0, FRAME_W, FRAME_H);
       sctx.restore();
 
-      // 3) Bake filter ke canvas output
       Filters.bakeToCanvas(canvas, tempSrc);
 
-      // 4) Overlay frame png jika ada
       if (frameOverlayImage) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(frameOverlayImage, 0, 0, FRAME_W, FRAME_H);
@@ -508,7 +459,76 @@ import { Filters } from './filters.js';
   }
 
   // ==============================
-  // Download ZIP
+  // Generate GIF from Frames (FIXED)
+  // ==============================
+  async function generateGIF(frames) {
+    setStatus('Membuat GIF animasi...');
+    showProgress(true);
+    
+    try {
+      // Convert blobs to base64 images
+      const images = [];
+      for (let i = 0; i < frames.length; i++) {
+        const blob = frames[i];
+        const base64 = await blobToBase64(blob);
+        images.push(base64);
+        
+        setProgress(
+          Math.round(((i + 1) / frames.length) * 50), 
+          `Preparing GIF: ${i + 1}/${frames.length}`
+        );
+      }
+
+      // Create GIF using gifshot
+      return new Promise((resolve, reject) => {
+        if (typeof gifshot === 'undefined') {
+          reject(new Error('gifshot library not loaded'));
+          return;
+        }
+
+        gifshot.createGIF({
+          images: images,
+          gifWidth: FRAME_W,
+          gifHeight: FRAME_H,
+          interval: GIF_DELAY / 1000, // Convert to seconds
+          frameDuration: 8, // 8 frames per second
+          sampleInterval: 10,
+          numWorkers: 2
+        }, (obj) => {
+          if (!obj.error) {
+            setProgress(100, 'GIF selesai!');
+            // Convert base64 to blob
+            fetch(obj.image)
+              .then(res => res.blob())
+              .then(blob => {
+                showProgress(false);
+                resolve(blob);
+              })
+              .catch(reject);
+          } else {
+            reject(new Error(obj.error));
+          }
+        });
+      });
+    } catch (e) {
+      console.error('GIF generation error:', e);
+      showProgress(false);
+      throw e;
+    }
+  }
+
+  // Helper: Convert Blob to Base64
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // ==============================
+  // Download ZIP (with GIF) - FIXED
   // ==============================
   downloadZip.onclick = async () => {
     if (!recordedBlob) return alert('Rekam video dulu');
@@ -518,28 +538,65 @@ import { Filters } from './filters.js';
       if (!ok) return;
     }
 
-    setStatus('Membuat ZIP...');
+    setStatus('Membuat ZIP dengan GIF...');
     framesData = await fastExtract(recordedBlob, recordFps);
 
     const zip = new JSZip();
-    const folder = zip.folder(getFileName('MOTIONME'));
+    const folderName = getFileName('MOTIONME');
+    const folder = zip.folder(folderName);
     showProgress(true);
 
+    // Add individual frames
     for (let i = 0; i < framesData.length; i++) {
       const b = framesData[i];
       const buf = await b.arrayBuffer();
       folder.file(`frame_${String(i + 1).padStart(4, '0')}.jpg`, buf);
-      setProgress(Math.round(((i + 1) / framesData.length) * 100), `ZIP ${i + 1}/${framesData.length}`);
+      setProgress(Math.round(((i + 1) / framesData.length) * 40), `Frames ${i + 1}/${framesData.length}`);
     }
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    saveAs(blob, `${getFileName('MOTIONME')}.zip`);
+    // Generate and add GIF
+    try {
+      setStatus('Membuat GIF animasi...');
+      setProgress(45, 'Memulai pembuatan GIF...');
+      
+      const gifBlob = await generateGIF(framesData);
+      
+      console.log('GIF Blob created:', gifBlob);
+      console.log('GIF size:', gifBlob.size, 'bytes');
+      
+      if (gifBlob && gifBlob.size > 0) {
+        const gifBuffer = await gifBlob.arrayBuffer();
+        const gifFilename = `${folderName}-animation.gif`;
+        folder.file(gifFilename, gifBuffer);
+        
+        console.log('GIF added to ZIP:', gifFilename);
+        setStatus(`GIF ditambahkan ke ZIP! (${(gifBlob.size / 1024 / 1024).toFixed(2)} MB) ✅`);
+        setProgress(90, 'GIF berhasil ditambahkan!');
+      } else {
+        throw new Error('GIF blob is empty');
+      }
+    } catch (e) {
+      console.error('GIF generation error:', e);
+      setStatus('⚠️ GIF gagal dibuat, melanjutkan dengan frames saja');
+      setProgress(90, 'Melanjutkan tanpa GIF...');
+    }
+
+    setProgress(95, 'Mengompres ZIP...');
+    const blob = await zip.generateAsync({ 
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+    
+    console.log('Final ZIP size:', blob.size, 'bytes');
+    
+    saveAs(blob, `${folderName}.zip`);
     showProgress(false);
-    setStatus('ZIP berhasil didownload ✅');
+    setStatus('ZIP berhasil didownload (include GIF animasi) ✅');
   };
 
   // ==============================
-  // Download PDF (8 foto per halaman, 3:2 ratio - 2x4 grid)
+  // Download PDF (8 foto per halaman, 3:2 ratio)
   // ==============================
   downloadPdf.onclick = async () => {
     if (!recordedBlob) return alert('Rekam video dulu');
@@ -555,10 +612,9 @@ import { Filters } from './filters.js';
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [PAGE_W, PAGE_H] });
 
-    // Layout: 8 foto per halaman (2 kolom x 4 baris)
     const cols = 2;
     const rows = 4;
-    const photosPerPage = cols * rows; // 8 foto
+    const photosPerPage = cols * rows;
     
     const margin = 12;
     const gapX = 8;
@@ -567,11 +623,9 @@ import { Filters } from './filters.js';
     const availableW = PAGE_W - (2 * margin) - (cols - 1) * gapX;
     const availableH = PAGE_H - (2 * margin) - (rows - 1) * gapY;
     
-    // Hitung ukuran foto dengan rasio 3:2
     const imgW = availableW / cols;
-    const imgH = imgW / 1.5; // 3:2 ratio
+    const imgH = imgW / 1.5;
     
-    // Cek apakah tinggi muat, jika tidak scale down
     const totalHeight = rows * imgH + (rows - 1) * gapY;
     let finalImgW = imgW;
     let finalImgH = imgH;
@@ -585,7 +639,6 @@ import { Filters } from './filters.js';
     showProgress(true);
 
     for (let i = 0; i < framesData.length; i++) {
-      // Tambah halaman baru setiap 8 foto
       if (i > 0 && i % photosPerPage === 0) {
         pdf.addPage([PAGE_W, PAGE_H]);
       }
@@ -609,7 +662,6 @@ import { Filters } from './filters.js';
       await new Promise((res) => { img.onload = res; img.src = frUrl; });
       tempCtx.drawImage(img, 0, 0, FRAME_W, FRAME_H);
 
-      // Nomor urut di kanan bawah
       const frameNum = i + 1;
       tempCtx.font = 'bold 22px Arial';
       tempCtx.textAlign = 'right';
@@ -650,7 +702,7 @@ import { Filters } from './filters.js';
 
   // ==============================
   // Init
-  // ============================
+  // ==============================
   (async () => {
     await listCameras();
     setStatus('Pilih kamera dan opsi rekaman');
