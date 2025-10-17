@@ -1367,7 +1367,7 @@ body {
   background: var(--p5); 
   display: grid; 
   place-items: center;
-  aspect-ratio: 1 / 1;
+  /* Show vertical lines for all layouts */
 }
 
 .layout-2row { 
@@ -1379,6 +1379,41 @@ body {
     linear-gradient(180deg, 
       transparent 32%, var(--border) 32%, var(--border) 34%, transparent 34%, 
       transparent 66%, var(--border) 66%, var(--border) 68%, transparent 68%);
+}
+
+.layout-3grid {
+  background: 
+    linear-gradient(180deg, 
+      transparent 32%, var(--border) 32%, var(--border) 34%, transparent 34%,
+      transparent 66%, var(--border) 66%, var(--border) 68%, transparent 68%);
+}
+
+.layout-4grid {
+  background: 
+    linear-gradient(180deg, 
+      transparent 24%, var(--border) 24%, var(--border) 26%, transparent 26%,
+      transparent 49%, var(--border) 49%, var(--border) 51%, transparent 51%,
+      transparent 74%, var(--border) 74%, var(--border) 76%, transparent 76%);
+}
+
+.layout-5mix {
+  background: 
+    linear-gradient(180deg, 
+      transparent 19%, var(--border) 19%, var(--border) 21%, transparent 21%,
+      transparent 39%, var(--border) 39%, var(--border) 41%, transparent 41%,
+      transparent 59%, var(--border) 59%, var(--border) 61%, transparent 61%,
+      transparent 79%, var(--border) 79%, var(--border) 81%, transparent 81%);
+}
+
+/* Layout 6 Grid - Vertikal */
+.layout-6grid {
+  background: 
+    linear-gradient(180deg, 
+      transparent 16%, var(--border) 16%, var(--border) 17%, transparent 17%,
+      transparent 32%, var(--border) 32%, var(--border) 34%, transparent 34%,
+      transparent 49%, var(--border) 49%, var(--border) 51%, transparent 51%,
+      transparent 66%, var(--border) 66%, var(--border) 68%, transparent 68%,
+      transparent 83%, var(--border) 83%, var(--border) 84%, transparent 84%);
 }
 
 .layout-3grid {
@@ -1508,7 +1543,7 @@ body {
   height: auto;
   display: block; 
   background: #fafafa;
-  aspect-ratio: 1 / 1;
+  /* NO fixed aspect ratio - height follows photo count */
 }
 
 .stage-wrap .wm {
