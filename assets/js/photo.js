@@ -1,5 +1,5 @@
 // assets/js/photo.js  (module)
-// Photobooth: Square 1:1 output + Mirror + Filters + Enhanced Controls
+// Photobooth: Vertical Layout + Frame Wrap + Mirror + Filters + Enhanced Controls + Upload Sticker + Layer Control
 import { Filters } from './filters.js';
 
 const $ = (s) => document.querySelector(s);
@@ -35,6 +35,9 @@ const btnFrameUpload = $('#btnFrameUpload');
 const inputFrameUpload = $('#uploadFrame');
 const btnFrameRemove = $('#btnFrameRemove');
 
+const btnStickerUpload = $('#btnStickerUpload');
+const inputStickerUpload = $('#uploadSticker');
+
 const selTarget = $('#selTarget');
 const scaleSlider = $('#scale');
 const rotateSlider = $('#rotate');
@@ -43,7 +46,7 @@ const rotVal = $('#rotVal');
 const btnCenter = $('#btnCenter');
 const btnDelSticker = $('#btnDelSticker');
 
-// New control buttons
+// Control buttons
 const scaleUp = $('#scaleUp');
 const scaleDown = $('#scaleDown');
 const rotateLeft = $('#rotateLeft');
@@ -52,6 +55,10 @@ const moveUp = $('#moveUp');
 const moveDown = $('#moveDown');
 const moveLeft = $('#moveLeft');
 const moveRight = $('#moveRight');
+
+// Layer control buttons
+const btnBringFront = $('#btnBringFront');
+const btnSendBack = $('#btnSendBack');
 
 const btnDownloadJpg = $('#btnDownloadJpg');
 
@@ -74,6 +81,7 @@ btnMirror?.addEventListener('click', () => {
   isMirrored = !isMirrored;
   video.classList.toggle('mirrored', isMirrored);
   btnMirror.classList.toggle('active', isMirrored);
+  btnMirror.textContent = isMirrored ? '🪞 Mirror: ON' : '🪞 Mirror Kamera';
   Filters.applyCSSTo(video);
 });
 
@@ -162,7 +170,7 @@ btnCapture.addEventListener('click', async () => {
   const vw = video.videoWidth || 1280;
   const vh = video.videoHeight || 720;
 
-  // Step 1: Draw video to temp canvas with mirror
+  // Step 1: Draw video with mirror
   const tempSrc = document.createElement('canvas');
   tempSrc.width = vw; 
   tempSrc.height = vh;
@@ -186,11 +194,10 @@ btnCapture.addEventListener('click', async () => {
   squareCanvas.height = size;
   const sqCtx = squareCanvas.getContext('2d');
   
-  // Draw cropped square from tempSrc
   sqCtx.drawImage(tempSrc, offsetX, offsetY, size, size, 0, 0, size, size);
 
-  // Step 3: Apply filters to square canvas
-  const finalSize = 1080; // target resolution
+  // Step 3: Apply filters
+  const finalSize = 1080;
   hiddenCanvas.width = finalSize;
   hiddenCanvas.height = finalSize;
   Filters.bakeToCanvas(hiddenCanvas, squareCanvas);
@@ -250,10 +257,12 @@ let activeIndex = 0;
 async function initEditor() {
   objects = [];
 
-  // SQUARE 1:1 Canvas
-  const canvasSize = 1080;
-  stage.width = canvasSize;
-  stage.height = canvasSize;
+  // DYNAMIC HEIGHT Canvas - Width 1080, height sesuai foto count
+  const canvasWidth = 1080;
+  const canvasHeight = 1080 * photoCount;
+  
+  stage.width = canvasWidth;
+  stage.height = canvasHeight;
 
   selTarget.innerHTML = '';
   for (let i = 0; i < photoCount; i++) {
@@ -283,114 +292,28 @@ async function initEditor() {
 }
 
 function applyLayout() {
-  const size = stage.width; // 1080x1080 square
+  const w = stage.width;  // 1080 fixed
+  const cellSize = 1080;   // Each photo is 1080x1080 (1:1)
 
-  switch (chosenLayout) {
-    case '2row': {
-      // 2 foto horizontal (atas-bawah)
-      const cellH = size / 2;
-      for (let i = 0; i < 2; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, size, cellH);
-        const ox = (size - fit.w) / 2;
-        const oy = i * cellH + (cellH - fit.h) / 2;
-        objects.push({ kind: 'photo', img: bmp, x: ox, y: oy, w: fit.w, h: fit.h, rot: 0 });
-      }
-      break;
-    }
-
-    case '3row': {
-      // 3 foto horizontal (atas-tengah-bawah)
-      const cellH = size / 3;
-      for (let i = 0; i < 3; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, size, cellH);
-        const ox = (size - fit.w) / 2;
-        const oy = i * cellH + (cellH - fit.h) / 2;
-        objects.push({ kind: 'photo', img: bmp, x: ox, y: oy, w: fit.w, h: fit.h, rot: 0 });
-      }
-      break;
-    }
-
-    case '4grid': {
-      // 4 foto grid 2x2
-      const cellSize = size / 2;
-      const positions = [
-        [0, 0], [cellSize, 0],
-        [0, cellSize], [cellSize, cellSize]
-      ];
-      for (let i = 0; i < 4; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, cellSize, cellSize);
-        const [baseX, baseY] = positions[i];
-        objects.push({ 
-          kind: 'photo', 
-          img: bmp, 
-          x: baseX + (cellSize - fit.w) / 2, 
-          y: baseY + (cellSize - fit.h) / 2, 
-          w: fit.w, 
-          h: fit.h, 
-          rot: 0 
-        });
-      }
-      break;
-    }
-
-    case '5mix': {
-      // 5 foto: 2 atas (kiri-kanan), 1 tengah (full width), 2 bawah (kiri-kanan)
-      const topH = size * 0.3;
-      const midH = size * 0.4;
-      const botH = size * 0.3;
-      const halfW = size / 2;
-
-      // 2 foto atas
-      for (let i = 0; i < 2; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, halfW, topH);
-        const ox = i * halfW + (halfW - fit.w) / 2;
-        objects.push({ kind: 'photo', img: bmp, x: ox, y: (topH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
-      }
-
-      // 1 foto tengah
-      const bmp2 = shots[2];
-      const fit2 = coverFit(bmp2.width, bmp2.height, size, midH);
-      objects.push({ kind: 'photo', img: bmp2, x: (size - fit2.w) / 2, y: topH + (midH - fit2.h) / 2, w: fit2.w, h: fit2.h, rot: 0 });
-
-      // 2 foto bawah
-      for (let i = 3; i < 5; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, halfW, botH);
-        const ox = (i - 3) * halfW + (halfW - fit.w) / 2;
-        objects.push({ kind: 'photo', img: bmp, x: ox, y: topH + midH + (botH - fit.h) / 2, w: fit.w, h: fit.h, rot: 0 });
-      }
-      break;
-    }
-
-    case '6grid': {
-      // 6 foto grid 2x3
-      const cellW = size / 2;
-      const cellH = size / 3;
-      const positions = [
-        [0, 0], [cellW, 0],
-        [0, cellH], [cellW, cellH],
-        [0, cellH * 2], [cellW, cellH * 2]
-      ];
-      for (let i = 0; i < 6; i++) {
-        const bmp = shots[i];
-        const fit = coverFit(bmp.width, bmp.height, cellW, cellH);
-        const [baseX, baseY] = positions[i];
-        objects.push({ 
-          kind: 'photo', 
-          img: bmp, 
-          x: baseX + (cellW - fit.w) / 2, 
-          y: baseY + (cellH - fit.h) / 2, 
-          w: fit.w, 
-          h: fit.h, 
-          rot: 0 
-        });
-      }
-      break;
-    }
+  // VERTICAL STACK: Semua foto disusun vertikal
+  for (let i = 0; i < photoCount; i++) {
+    const bmp = shots[i];
+    const y = i * cellSize; // Stack vertikal
+    
+    // Foto sudah 1:1, fit ke 1080x1080
+    const fit = coverFit(bmp.width, bmp.height, cellSize, cellSize);
+    const ox = (cellSize - fit.w) / 2;
+    const oy = (cellSize - fit.h) / 2;
+    
+    objects.push({ 
+      kind: 'photo', 
+      img: bmp, 
+      x: ox, 
+      y: y + oy, 
+      w: fit.w, 
+      h: fit.h, 
+      rot: 0 
+    });
   }
 }
 
@@ -402,15 +325,19 @@ function loadFramePresets(max = 12) {
     div.className = 'thumb';
     const img = document.createElement('img');
     img.src = src;
+    img.onerror = () => div.style.display = 'none';
     div.appendChild(img);
     div.addEventListener('click', async () => {
       const el = await loadImage(src);
       let idx = objects.findIndex(o => o.kind === 'frame');
       if (idx === -1) {
+        // Frame wrap entire canvas
         objects.push({ kind: 'frame', img: el, x: 0, y: 0, w: stage.width, h: stage.height, rot: 0 });
         idx = objects.length - 1;
       } else {
         objects[idx].img = el;
+        objects[idx].w = stage.width;
+        objects[idx].h = stage.height;
       }
       activeIndex = idx;
       selTarget.value = 'frame';
@@ -429,11 +356,12 @@ function loadStickerPresets(max = 20) {
     div.className = 'thumb';
     const img = document.createElement('img');
     img.src = src;
+    img.onerror = () => div.style.display = 'none';
     div.appendChild(img);
     div.addEventListener('click', async () => {
       const el = await loadImage(src);
       const w = 200, h = 200;
-      objects.push({ kind: 'sticker', img: el, x: (stage.width - w)/2, y: (stage.height - h)/2, w, h, rot: 0 });
+      objects.push({ kind: 'sticker', img: el, x: (stage.width - w)/2, y: (stage.height/2 - h/2), w, h, rot: 0 });
       activeIndex = objects.length - 1;
       selTarget.value = 'sticker';
       syncUIToActive();
@@ -457,6 +385,8 @@ inputFrameUpload.addEventListener('change', async () => {
     idx = objects.length - 1;
   } else {
     objects[idx].img = el;
+    objects[idx].w = stage.width;
+    objects[idx].h = stage.height;
   }
   activeIndex = idx;
   selTarget.value = 'frame';
@@ -473,6 +403,23 @@ btnFrameRemove.addEventListener('click', () => {
     syncUIToActive();
     draw();
   }
+});
+
+// ===== Upload Sticker Custom =====
+btnStickerUpload.addEventListener('click', () => inputStickerUpload.click());
+inputStickerUpload.addEventListener('change', async () => {
+  const f = inputStickerUpload.files?.[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  const el = await loadImage(url);
+  URL.revokeObjectURL(url);
+
+  const w = 200, h = 200;
+  objects.push({ kind: 'sticker', img: el, x: (stage.width - w)/2, y: (stage.height/2 - h/2), w, h, rot: 0 });
+  activeIndex = objects.length - 1;
+  selTarget.value = 'sticker';
+  syncUIToActive();
+  draw();
 });
 
 // ===== Controls =====
@@ -504,7 +451,6 @@ scaleSlider.addEventListener('input', () => {
   draw();
 });
 
-// Scale +/- buttons
 scaleUp.addEventListener('click', () => {
   let val = Number(scaleSlider.value);
   val = Math.min(300, val + 5);
@@ -528,7 +474,6 @@ rotateSlider.addEventListener('input', () => {
   draw();
 });
 
-// Rotate +/- buttons
 rotateRight.addEventListener('click', () => {
   let val = Number(rotateSlider.value);
   val = Math.min(180, val + 5);
@@ -574,7 +519,6 @@ moveRight.addEventListener('click', () => {
   draw();
 });
 
-// Center button
 btnCenter.addEventListener('click', () => {
   const o = objects[activeIndex];
   if (!o) return;
@@ -591,6 +535,49 @@ btnDelSticker.addEventListener('click', () => {
     syncUIToActive();
     draw();
   }
+});
+
+// ===== Layer Control (Front/Back) =====
+btnBringFront?.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o || activeIndex === objects.length - 1) return;
+  
+  // Move object to end of array (top layer)
+  objects.splice(activeIndex, 1);
+  objects.push(o);
+  activeIndex = objects.length - 1;
+  
+  // Update selector
+  if (o.kind === 'photo') {
+    selTarget.value = `p${photoIndex(activeIndex)}`;
+  } else if (o.kind === 'frame') {
+    selTarget.value = 'frame';
+  } else if (o.kind === 'sticker') {
+    selTarget.value = 'sticker';
+  }
+  
+  draw();
+});
+
+btnSendBack?.addEventListener('click', () => {
+  const o = objects[activeIndex];
+  if (!o || activeIndex === 0) return;
+  
+  // Move object to start of array (bottom layer)
+  objects.splice(activeIndex, 1);
+  objects.unshift(o);
+  activeIndex = 0;
+  
+  // Update selector
+  if (o.kind === 'photo') {
+    selTarget.value = `p${photoIndex(activeIndex)}`;
+  } else if (o.kind === 'frame') {
+    selTarget.value = 'frame';
+  } else if (o.kind === 'sticker') {
+    selTarget.value = 'sticker';
+  }
+  
+  draw();
 });
 
 // ===== Drag mouse/touch =====
@@ -650,10 +637,9 @@ stage.addEventListener('touchmove', (e)=>{
 
 stage.addEventListener('touchend', ()=> drag.on=false);
 
-// ===== Download JPG (Square 1:1) =====
+// ===== Download JPG (Dynamic Height) =====
 btnDownloadJpg.addEventListener('click', async ()=>{
   const out = document.createElement('canvas');
-  // Square output dengan watermark space
   out.width = stage.width;
   out.height = stage.height + 40;
   const c = out.getContext('2d');
@@ -670,13 +656,13 @@ btnDownloadJpg.addEventListener('click', async ()=>{
   c.globalAlpha = 1;
 
   out.toBlob((blob)=>{
-    saveAs(blob, fileName('Photobooth-Square') + '.jpg');
+    const filename = `${fileName('Motion-Us')}-${photoCount}Foto.jpg`;
+    saveAs(blob, filename);
   }, 'image/jpeg', 0.92);
 });
 
 // ===== Helpers =====
 function swap(a, b){ a.classList.remove('active'); b.classList.add('active'); }
-
 function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 function fileName(prefix){
@@ -690,7 +676,6 @@ function fileName(prefix){
 }
 
 function coverFit(srcW, srcH, dstW, dstH) {
-  // Cover fit: fill entire area, crop excess (no distortion)
   const s = Math.max(dstW/srcW, dstH/srcH);
   return { w: srcW*s, h: srcH*s };
 }
