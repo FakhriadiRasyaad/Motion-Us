@@ -62,19 +62,19 @@
         <!-- Layout 4 Foto -->
         <button class="layout-card" data-layout="4grid" data-count="4">
           <div class="layout-visual layout-4grid"></div>
-          <div class="layout-title">4 Foto (Grid)</div>
+          <div class="layout-title">4 Foto (Baris)</div>
         </button>
 
         <!-- Layout 5 Foto -->
         <button class="layout-card" data-layout="5mix" data-count="5">
           <div class="layout-visual layout-5mix"></div>
-          <div class="layout-title">5 Foto (Mix)</div>
+          <div class="layout-title">5 Foto (Baris)</div>
         </button>
 
         <!-- Layout 6 Foto -->
         <button class="layout-card" data-layout="6grid" data-count="6">
           <div class="layout-visual layout-6grid"></div>
-          <div class="layout-title">6 Foto (Grid)</div>
+          <div class="layout-title">6 Foto (Baris)</div>
         </button>
       </div>
       <div class="step-actions">
@@ -120,63 +120,12 @@
       <div class="editor">
         <!-- Kanvas utama -->
         <div class="stage-wrap">
-          <canvas id="stage" width="720" height="1080"></canvas>
+          <canvas id="stage" width="1080" height="1080"></canvas>
           <div class="wm">Motion-US</div>
         </div>
 
         <!-- Panel kontrol -->
         <aside class="panel">
-<!-- Kontrol objek terpilih -->
-<div class="panel-group">
-  <h3>Kontrol Objek</h3>
-  <div class="row">
-    <label>Jenis:</label>
-    <select id="selTarget">
-      <option value="p0">Foto 1</option>
-    </select>
-  </div>
-
-  <!-- Kontrol Posisi dengan Joystick -->
-  <div class="control-section">
-    <label>Posisi:</label>
-    <div class="joystick-control">
-      <button class="joy-btn joy-up" id="moveUp">▲</button>
-      <div class="joy-middle">
-        <button class="joy-btn joy-left" id="moveLeft">◀</button>
-        <button class="joy-btn joy-center" id="btnCenter">⊙</button>
-        <button class="joy-btn joy-right" id="moveRight">▶</button>
-      </div>
-      <button class="joy-btn joy-down" id="moveDown">▼</button>
-    </div>
-  </div>
-
-  <!-- Kontrol Skala dengan +/- -->
-  <div class="control-section">
-    <label>Skala: <span id="scaleVal">100%</span></label>
-    <div class="control-with-buttons">
-      <button class="ctrl-btn" id="scaleDown">−</button>
-      <input id="scale" type="range" min="10" max="300" value="100">
-      <button class="ctrl-btn" id="scaleUp">+</button>
-    </div>
-  </div>
-
-  <!-- Kontrol Rotasi dengan +/- -->
-  <div class="control-section">
-    <label>Rotasi: <span id="rotVal">0°</span></label>
-    <div class="control-with-buttons">
-      <button class="ctrl-btn" id="rotateLeft">−</button>
-      <input id="rotate" type="range" min="-180" max="180" value="0">
-      <button class="ctrl-btn" id="rotateRight">+</button>
-    </div>
-  </div>
-
-  <div class="row">
-    <button id="btnDelSticker" class="btn danger thin full">🗑️ Hapus Sticker</button>
-  </div>
-</div>
-
-
-
           <!-- Preset Frame -->
           <div class="panel-group">
             <h3>Frame (Opsional)</h3>
@@ -192,9 +141,81 @@
           <div class="panel-group">
             <h3>Aksesoris</h3>
             <div id="stickerPreset" class="thumb-grid"></div>
+            <div class="row" style="margin-top: 10px;">
+              <input type="file" id="uploadSticker" accept="image/png,image/jpeg" hidden>
+              <button id="btnStickerUpload" class="btn secondary full">📤 Upload Aksesoris</button>
+            </div>
           </div>
 
-          
+          <!-- Kontrol objek terpilih -->
+          <div class="panel-group">
+            <h3>Kontrol Objek</h3>
+            <div class="row">
+              <label>Jenis:</label>
+              <select id="selTarget">
+                <option value="p0">Foto 1</option>
+              </select>
+            </div>
+
+            <!-- Kontrol Posisi dengan Joystick -->
+            <div class="control-section">
+              <label>Posisi:</label>
+              <div class="joystick-control">
+                <button class="joy-btn joy-up" id="moveUp">▲</button>
+                <div class="joy-middle">
+                  <button class="joy-btn joy-left" id="moveLeft">◀</button>
+                  <button class="joy-btn joy-center" id="btnCenter">⊙</button>
+                  <button class="joy-btn joy-right" id="moveRight">▶</button>
+                </div>
+                <button class="joy-btn joy-down" id="moveDown">▼</button>
+              </div>
+            </div>
+
+            <!-- Kontrol Skala dengan +/- -->
+            <div class="control-section">
+              <label>Skala: <span id="scaleVal">100%</span></label>
+              <div class="control-with-buttons">
+                <button class="ctrl-btn" id="scaleDown">−</button>
+                <input id="scale" type="range" min="10" max="300" value="100">
+                <button class="ctrl-btn" id="scaleUp">+</button>
+              </div>
+            </div>
+
+            <!-- Kontrol Rotasi dengan +/- -->
+            <div class="control-section">
+              <label>Rotasi: <span id="rotVal">0°</span></label>
+              <div class="control-with-buttons">
+                <button class="ctrl-btn" id="rotateLeft">−</button>
+                <input id="rotate" type="range" min="-180" max="180" value="0">
+                <button class="ctrl-btn" id="rotateRight">+</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <button id="btnDelSticker" class="btn danger thin full">🗑️ Hapus Sticker</button>
+            </div>
+
+            <!-- Layer Control -->
+            <div class="control-section">
+              <label>Layer Order:</label>
+              <div class="layer-control">
+                <button class="layer-btn" id="btnBringFront" title="Pindah ke Depan">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <path d="M7 12h10M12 7v10"/>
+                  </svg>
+                  Ke Depan
+                </button>
+                <button class="layer-btn" id="btnSendBack" title="Pindah ke Belakang">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <path d="M7 12h10"/>
+                  </svg>
+                  Ke Belakang
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="panel-group">
             <button id="btnDownloadJpg" class="btn ok full">💾 Download JPG</button>
