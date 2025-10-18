@@ -317,10 +317,15 @@ function applyLayout() {
   }
 }
 
-function loadFramePresets(max = 12) {
+// ✅ LOAD FRAME BERDASARKAN JUMLAH FOTO (DYNAMIC)
+function loadFramePresets(max = 5) {
   framePreset.innerHTML = '';
+  
+  // Tentukan folder berdasarkan jumlah foto
+  const folderPath = `../assets/img/frames/${photoCount}_Foto`;
+  
   for (let i = 1; i <= max; i++) {
-    const src = `../assets/img/frames/${i}.png`;
+    const src = `${folderPath}/${i}.png`;
     const div = document.createElement('button');
     div.className = 'thumb';
     const img = document.createElement('img');
@@ -331,8 +336,16 @@ function loadFramePresets(max = 12) {
       const el = await loadImage(src);
       let idx = objects.findIndex(o => o.kind === 'frame');
       if (idx === -1) {
-        // Frame wrap entire canvas
-        objects.push({ kind: 'frame', img: el, x: 0, y: 0, w: stage.width, h: stage.height, rot: 0 });
+        // Frame wrap entire canvas (width 1080, height dynamic)
+        objects.push({ 
+          kind: 'frame', 
+          img: el, 
+          x: 0, 
+          y: 0, 
+          w: stage.width, 
+          h: stage.height, 
+          rot: 0 
+        });
         idx = objects.length - 1;
       } else {
         objects[idx].img = el;
@@ -348,7 +361,7 @@ function loadFramePresets(max = 12) {
   }
 }
 
-function loadStickerPresets(max = 20) {
+function loadStickerPresets(max = 50) {
   stickerPreset.innerHTML = '';
   for (let i = 1; i <= max; i++) {
     const src = `../assets/img/aksesoris/${i}.png`;
@@ -381,7 +394,15 @@ inputFrameUpload.addEventListener('change', async () => {
 
   let idx = objects.findIndex(o => o.kind === 'frame');
   if (idx === -1) {
-    objects.push({ kind: 'frame', img: el, x: 0, y: 0, w: stage.width, h: stage.height, rot: 0 });
+    objects.push({ 
+      kind: 'frame', 
+      img: el, 
+      x: 0, 
+      y: 0, 
+      w: stage.width, 
+      h: stage.height, 
+      rot: 0 
+    });
     idx = objects.length - 1;
   } else {
     objects[idx].img = el;
@@ -547,14 +568,8 @@ btnBringFront?.addEventListener('click', () => {
   objects.push(o);
   activeIndex = objects.length - 1;
   
-  // Update selector
-  if (o.kind === 'photo') {
-    selTarget.value = `p${photoIndex(activeIndex)}`;
-  } else if (o.kind === 'frame') {
-    selTarget.value = 'frame';
-  } else if (o.kind === 'sticker') {
-    selTarget.value = 'sticker';
-  }
+  // ✅ Update selector sesuai object yang dipindah
+  updateSelectorAfterLayerChange(o);
   
   draw();
 });
@@ -568,17 +583,33 @@ btnSendBack?.addEventListener('click', () => {
   objects.unshift(o);
   activeIndex = 0;
   
-  // Update selector
-  if (o.kind === 'photo') {
-    selTarget.value = `p${photoIndex(activeIndex)}`;
-  } else if (o.kind === 'frame') {
-    selTarget.value = 'frame';
-  } else if (o.kind === 'sticker') {
-    selTarget.value = 'sticker';
-  }
+  // ✅ Update selector sesuai object yang dipindah
+  updateSelectorAfterLayerChange(o);
   
   draw();
 });
+
+// ✅ Helper function untuk update selector
+function updateSelectorAfterLayerChange(obj) {
+  if (obj.kind === 'photo') {
+    // Cari index foto di objects
+    let photoIdx = 0;
+    for (let i = 0; i <= activeIndex; i++) {
+      if (objects[i].kind === 'photo' && objects[i] === obj) {
+        break;
+      }
+      if (objects[i].kind === 'photo') {
+        photoIdx++;
+      }
+    }
+    selTarget.value = `p${photoIdx}`;
+  } else if (obj.kind === 'frame') {
+    selTarget.value = 'frame';
+  } else if (obj.kind === 'sticker') {
+    selTarget.value = 'sticker';
+  }
+  syncUIToActive();
+}
 
 // ===== Drag mouse/touch =====
 let drag = { on:false, dx:0, dy:0 };
@@ -733,11 +764,8 @@ function draw(){
   g.fillStyle = '#fff';
   g.fillRect(0,0,stage.width,stage.height);
 
-  const photos = objects.filter(o=>o.kind==='photo');
-  const stickers = objects.filter(o=>o.kind==='sticker');
-  const frames = objects.filter(o=>o.kind==='frame');
-
-  [...photos, ...stickers, ...frames].forEach(o => drawObject(o));
+  // ✅ PERBAIKAN: Gambar sesuai urutan di array (untuk layer control)
+  objects.forEach(o => drawObject(o));
 }
 
 function drawObject(o){
