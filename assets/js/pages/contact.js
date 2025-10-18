@@ -3,7 +3,6 @@ const form = document.getElementById("contactForm");
 const btnSend = document.getElementById("btnSend");
 const ok = document.getElementById("formOk");
 const err = document.getElementById("formErr");
-
 // (opsional) tampilkan/hidden alert
 const show = (el) => { el.style.display = "block"; };
 const hide = (el) => { el.style.display = "none"; };
