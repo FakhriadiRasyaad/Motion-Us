@@ -1367,7 +1367,6 @@ body {
   background: var(--p5); 
   display: grid; 
   place-items: center;
-  /* Show vertical lines for all layouts */
 }
 
 .layout-2row { 
@@ -1405,7 +1404,6 @@ body {
       transparent 79%, var(--border) 79%, var(--border) 81%, transparent 81%);
 }
 
-/* Layout 6 Grid - Vertikal */
 .layout-6grid {
   background: 
     linear-gradient(180deg, 
@@ -1442,7 +1440,6 @@ body {
   background-repeat: no-repeat, repeat-y;
 }
 
-/* Layout 6 Grid */
 .layout-6grid {
   background: 
     linear-gradient(180deg, 
@@ -1464,6 +1461,7 @@ body {
   align-items: start; 
 }
 
+
 .live-box {
   position: relative; 
   background: #000; 
@@ -1471,12 +1469,14 @@ body {
   border-radius: 12px; 
   overflow: hidden;
   box-shadow: var(--shadow);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 #video { 
   width: 100%; 
   display: block; 
-  aspect-ratio: 16/9; 
+  aspect-ratio: 1 / 1; 
   object-fit: cover; 
 }
 
@@ -1543,7 +1543,6 @@ body {
   height: auto;
   display: block; 
   background: #fafafa;
-  /* NO fixed aspect ratio - height follows photo count */
 }
 
 .stage-wrap .wm {
@@ -1636,7 +1635,6 @@ body {
    PHOTOBOOTH - Enhanced Controls
    ========================================================= */
 
-/* Control Section */
 .control-section {
   margin-bottom: 16px;
 }
@@ -1649,7 +1647,6 @@ body {
   font-size: 14px;
 }
 
-/* Joystick Control */
 .joystick-control {
   display: flex;
   flex-direction: column;
@@ -1704,7 +1701,6 @@ body {
   background: var(--primary);
 }
 
-/* Control with +/- Buttons */
 .control-with-buttons {
   display: grid;
   grid-template-columns: 40px 1fr 40px;
@@ -1739,7 +1735,6 @@ body {
   transform: scale(0.95);
 }
 
-/* Range Slider Enhanced */
 .control-with-buttons input[type="range"] {
   flex: 1;
   height: 8px;
@@ -1780,12 +1775,10 @@ body {
   box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1);
 }
 
-/* Mirror preview kamera di Step 2 */
 #video.mirrored {
   transform: scaleX(-1);
 }
 
-/* Filter panel */
 .filters-panel {
   display: grid;
   gap: .6rem;
@@ -1816,11 +1809,7 @@ body {
   }
 
   .live-box {
-    min-height: 400px;
-  }
-
-  #video {
-    min-height: 400px;
+    max-width: 500px;
   }
 }
 
@@ -1832,13 +1821,8 @@ body {
   }
 
   .live-box {
-    min-height: 500px;
     max-width: 100%;
-  }
-
-  #video {
-    min-height: 500px;
-    max-height: 70vh;
+    width: 100%;
   }
 
   .cam-side {
@@ -1864,7 +1848,6 @@ body {
     width: 100%;
   }
 
-  /* Joystick lebih besar di mobile */
   .joy-btn {
     width: 56px;
     height: 56px;
@@ -1891,11 +1874,7 @@ body {
 /* Small Mobile */
 @media (max-width: 480px) {
   .live-box {
-    min-height: 400px;
-  }
-
-  #video {
-    min-height: 400px;
+    max-width: 100%;
   }
 
   .thumb-grid {
