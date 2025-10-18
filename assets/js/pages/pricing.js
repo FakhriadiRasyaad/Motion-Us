@@ -13,7 +13,7 @@ async function ensureAuth() {
 
 function goToPayment(token, price) {
   localStorage.setItem('selectedPackage', JSON.stringify({ token, price }));
-  location.href = 'Pricing/pembayaran.html';
+  location.href = 'Pricing/Pembayaran.html';
 }
 
 (async function init() {
@@ -45,6 +45,6 @@ document.querySelectorAll('.price-card').forEach(card => {
       localStorage.setItem('selectedPackage', JSON.stringify({ token, price }));
   
       // Arahkan ke halaman pembayaran
-      location.href = 'Pricing/pembayaran.html';
+      location.href = 'Pricing/Pembayaran.html';
     });
   });
