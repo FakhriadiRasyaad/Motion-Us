@@ -6,7 +6,7 @@
   <title>Photobooth – Motion-US</title>
   <link rel="icon" type="image/png" href="../assets/img/logo.png">
   <!-- Global + Page CSS -->
-  <link rel="stylesheet" href="../assets/css/style.css">
+ 
   <link rel="stylesheet" href="../assets/css/photo.css">
 </head>
 <body class="page-photo">
@@ -110,124 +110,119 @@
 
       <div id="filterPanel" style="margin-top:1rem;"></div>
 
-      <canvas id="hiddenCanvas" width="1280" height="720" hidden></canvas>
+      <!-- ✅ PERUBAHAN UTAMA: Canvas dari 1280x720 menjadi 1080x1080 -->
+      <canvas id="hiddenCanvas" width="1080" height="1080" hidden></canvas>
     </section>
 
     <!-- STEP 3: EDITOR -->
-    <section class="step" id="step3">
-      <h2>Langkah 3 — Edit & Sesuaikan</h2>
+    <!-- STEP 3: EDITOR -->
+<section class="step" id="step3">
+  <h2>Langkah 3 — Edit & Sesuaikan</h2>
 
-      <div class="editor">
-        <!-- Kanvas utama -->
-        <div class="stage-wrap">
-          <canvas id="stage" width="1080" height="1080"></canvas>
-          <div class="wm">Motion-US</div>
+  <!-- ✅ HANYA SATU .editor & SATU stage-wrap -->
+  <div class="editor">
+    <!-- KOLOM KIRI: KONTROL -->
+    <aside class="panel-left">
+      <div class="panel-group">
+        <h3>Kontrol Objek</h3>
+
+        <div class="row">
+          <label>Jenis:</label>
+          <select id="selTarget">
+            <option value="p0">Foto 1</option>
+          </select>
         </div>
 
-        <!-- Panel kontrol -->
-        <aside class="panel">
-          <!-- Preset Frame -->
-          <div class="panel-group">
-            <h3>Frame (Opsional)</h3>
-            <div id="framePreset" class="thumb-grid"></div>
-            <div class="row">
-              <input type="file" id="uploadFrame" accept="image/png,image/jpeg" hidden>
-              <button id="btnFrameUpload" class="btn secondary">📤 Upload Frame</button>
-              <button id="btnFrameRemove" class="btn danger thin">Hapus Frame</button>
+        <!-- Posisi (joystick) -->
+        <div class="control-section">
+          <label>Posisi:</label>
+          <div class="joystick-control">
+            <button class="joy-btn joy-up" id="moveUp">▲</button>
+            <div class="joy-middle">
+              <button class="joy-btn joy-left" id="moveLeft">◀</button>
+              <button class="joy-btn joy-center" id="btnCenter">⊙</button>
+              <button class="joy-btn joy-right" id="moveRight">▶</button>
             </div>
+            <button class="joy-btn joy-down" id="moveDown">▼</button>
           </div>
+        </div>
 
-          <!-- Aksesoris -->
-          <div class="panel-group">
-            <h3>Aksesoris</h3>
-            <div id="stickerPreset" class="thumb-grid"></div>
-            <div class="row" style="margin-top: 10px;">
-              <input type="file" id="uploadSticker" accept="image/png,image/jpeg" hidden>
-              <button id="btnStickerUpload" class="btn secondary full">📤 Upload Aksesoris</button>
-            </div>
+        <!-- Skala -->
+        <div class="control-section">
+          <label>Skala: <span id="scaleVal">100%</span></label>
+          <div class="control-with-buttons">
+            <button class="ctrl-btn" id="scaleDown">−</button>
+            <input id="scale" type="range" min="10" max="300" value="100">
+            <button class="ctrl-btn" id="scaleUp">+</button>
           </div>
+        </div>
 
-          <!-- Kontrol objek terpilih -->
-          <div class="panel-group">
-            <h3>Kontrol Objek</h3>
-            <div class="row">
-              <label>Jenis:</label>
-              <select id="selTarget">
-                <option value="p0">Foto 1</option>
-              </select>
-            </div>
-
-            <!-- Kontrol Posisi dengan Joystick -->
-            <div class="control-section">
-              <label>Posisi:</label>
-              <div class="joystick-control">
-                <button class="joy-btn joy-up" id="moveUp">▲</button>
-                <div class="joy-middle">
-                  <button class="joy-btn joy-left" id="moveLeft">◀</button>
-                  <button class="joy-btn joy-center" id="btnCenter">⊙</button>
-                  <button class="joy-btn joy-right" id="moveRight">▶</button>
-                </div>
-                <button class="joy-btn joy-down" id="moveDown">▼</button>
-              </div>
-            </div>
-
-            <!-- Kontrol Skala dengan +/- -->
-            <div class="control-section">
-              <label>Skala: <span id="scaleVal">100%</span></label>
-              <div class="control-with-buttons">
-                <button class="ctrl-btn" id="scaleDown">−</button>
-                <input id="scale" type="range" min="10" max="300" value="100">
-                <button class="ctrl-btn" id="scaleUp">+</button>
-              </div>
-            </div>
-
-            <!-- Kontrol Rotasi dengan +/- -->
-            <div class="control-section">
-              <label>Rotasi: <span id="rotVal">0°</span></label>
-              <div class="control-with-buttons">
-                <button class="ctrl-btn" id="rotateLeft">−</button>
-                <input id="rotate" type="range" min="-180" max="180" value="0">
-                <button class="ctrl-btn" id="rotateRight">+</button>
-              </div>
-            </div>
-
-            <div class="row">
-              <button id="btnDelSticker" class="btn danger thin full">🗑️ Hapus Sticker</button>
-            </div>
-
-            <!-- Layer Control -->
-            <div class="control-section">
-              <label>Layer Order:</label>
-              <div class="layer-control">
-                <button class="layer-btn" id="btnBringFront" title="Pindah ke Depan">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <path d="M7 12h10M12 7v10"/>
-                  </svg>
-                  Ke Depan
-                </button>
-                <button class="layer-btn" id="btnSendBack" title="Pindah ke Belakang">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 17V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                    <path d="M7 12h10"/>
-                  </svg>
-                  Ke Belakang
-                </button>
-              </div>
-            </div>
+        <!-- Rotasi -->
+        <div class="control-section">
+          <label>Rotasi: <span id="rotVal">0°</span></label>
+          <div class="control-with-buttons">
+            <button class="ctrl-btn" id="rotateLeft">−</button>
+            <input id="rotate" type="range" min="-180" max="180" value="0">
+            <button class="ctrl-btn" id="rotateRight">+</button>
           </div>
+        </div>
 
-          <div class="panel-group">
-            <button id="btnDownloadJpg" class="btn ok full">💾 Download JPG</button>
-            <small class="muted">Watermark otomatis "Motion-US".</small>
+        <div class="row">
+          <button id="btnDelSticker" class="btn danger full">🗑️ Hapus Sticker</button>
+        </div>
+
+        <!-- Layer order -->
+        <div class="control-section">
+          <label>Layer Order:</label>
+          <div class="layer-control">
+            <button class="layer-btn" id="btnBringFront"><span>Ke Depan</span></button>
+            <button class="layer-btn" id="btnSendBack"><span>Ke Belakang</span></button>
           </div>
-        </aside>
+        </div>
+      </div>
+    </aside>
+
+    <!-- KOLOM TENGAH: STAGE / CANVAS (SATU-SATUNYA) -->
+    <div class="stage-wrap">
+      <canvas id="stage" width="1080" height="1080"></canvas>
+      <div class="wm">Motion-US</div>
+    </div>
+
+    <!-- KOLOM KANAN: FRAME + AKSESORIS + DOWNLOAD -->
+    <aside class="panel-right">
+      <div class="panel-group">
+        <h3>Frame Width 1080 Height 1080 x Jumlah Foto</h3>
+        <div id="framePreset" class="thumb-grid"></div>
+        <div class="row">
+          <button id="btnFrameUpload" class="btn secondary">📤 Upload Frame</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button id="btnFrameRemove" class="btn danger full">Hapus Frame</button>
+        </div>
+        <input type="file" id="uploadFrame" accept="image/png,image/jpeg" hidden>
       </div>
 
-      <div class="step-actions">
-        <button id="backTo2" class="btn secondary">← Kembali Ambil Foto</button>
+      <div class="panel-group">
+        <h3>Aksesoris</h3>
+        <div id="stickerPreset" class="thumb-grid"></div>
+        <div class="row">
+          <button id="btnStickerUpload" class="btn secondary full">📤 Upload Aksesoris</button>
+        </div>
+        <input type="file" id="uploadSticker" accept="image/png,image/jpeg" hidden>
       </div>
-    </section>
+
+      <div class="panel-group">
+        <button id="btnDownloadJpg" class="btn ok full">💾 Download JPG</button>
+        <small class="muted center-note">Watermark otomatis "Motion-US".</small>
+      </div>
+    </aside>
+  </div>
+
+  <div class="step-actions">
+    <button id="backTo2" class="btn secondary">← Kembali Ambil Foto</button>
+  </div>
+</section>
+
   </main>
 
   <footer class="footer">
