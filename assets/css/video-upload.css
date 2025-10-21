@@ -1,0 +1,292 @@
+/* assets/css/video-upload.css */
+/* Styles for Video Upload Feature */
+
+/* Upload Steps */
+.upload-step {
+    display: none;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .upload-step.active {
+    display: block;
+  }
+  
+  .upload-step h3 {
+    color: #1e293b;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  /* Duration Options */
+  .duration-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .duration-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .duration-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+  }
+  
+  .duration-btn.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+  }
+  
+  .duration-icon {
+    font-size: 2rem;
+  }
+  
+  .duration-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .duration-info {
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+  
+  .note-small {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .note-small strong {
+    color: #3b82f6;
+    font-weight: 600;
+  }
+  
+  /* Video Upload Box */
+  .video-upload-box {
+    border: 3px dashed #3b82f6;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .video-upload-box:hover {
+    background: #dbeafe;
+    border-color: #2563eb;
+    transform: scale(1.02);
+  }
+  
+  .video-upload-box.drag-over {
+    background: #dbeafe;
+    border-color: #2563eb;
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+  }
+  
+  .video-upload-box .upload-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .video-upload-box p {
+    color: #64748b;
+    margin: 0.5rem 0;
+  }
+  
+  .video-upload-box p strong {
+    color: #1e293b;
+    font-size: 1.1rem;
+  }
+  
+  .upload-info {
+    font-size: 0.875rem;
+    color: #94a3b8;
+  }
+  
+  /* Video Preview */
+  .video-preview-wrap {
+    margin-top: 1rem;
+  }
+  
+  .video-preview-wrap.hidden {
+    display: none;
+  }
+  
+  .video-preview-wrap video {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: #000;
+  }
+  
+  .video-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f1f5f9;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .video-info span {
+    font-size: 0.9rem;
+    color: #475569;
+  }
+  
+  .btn-remove {
+    width: 100%;
+    padding: 0.75rem;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-remove:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+  
+  /* Process Button */
+  .btn-process {
+    width: 100%;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-process:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  }
+  
+  .btn-process:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  /* Result Preview */
+  .result-preview {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .result-preview.hidden {
+    display: none;
+  }
+  
+  .result-preview h3 {
+    color: #059669;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+  
+  .result-preview video {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #000;
+  }
+  
+  .frame-count {
+    text-align: center;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .duration-options {
+      grid-template-columns: 1fr;
+    }
+  
+    .duration-btn {
+      padding: 1.25rem 1rem;
+    }
+  
+    .video-upload-box {
+      padding: 2rem 1rem;
+    }
+  
+    .video-upload-box .upload-icon {
+      font-size: 3rem;
+    }
+  
+    .btn-process {
+      font-size: 1rem;
+      padding: 1rem;
+    }
+  
+    .upload-step {
+      padding: 1rem;
+    }
+  }
+  
+  /* Processing State */
+  .processing {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  
+  .processing::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      #3b82f6, 
+      transparent
+    );
+    animation: loading 1.5s infinite;
+  }
+  
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }

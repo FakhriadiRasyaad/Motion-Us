@@ -663,12 +663,11 @@
     .stage-wrap .wm{
       position:absolute;
       right:12px;
-      bottom:8px;
+      bottom:12px;
       font-weight:800;
-      font-size:14px;
-      color:var(--text);
-      opacity:.2;
-      pointer-events:none;
+      font-size:30px;
+      color:#ef4444;
+      text-align: center;
     }
     
     /* Panel umum */
