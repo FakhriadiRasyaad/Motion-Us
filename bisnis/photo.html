@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photobooth</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <link rel="stylesheet" href="/bisnis/photo.css">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="../assets/js/supabaseClient.js"></script>
+  <style>
+    html{background:#0b1020}
+    body{visibility:hidden}
+    body.ready{visibility:visible}
+  </style>
+</head>
+<body class="page-photo">
+  <!-- Gate -->
+  <script type="module" src="./js/gate-bisnis.js"></script>
+
+  <main class="pb-wrap">
+    <header class="pb-head">
+      <h1>📸 Photobooth</h1>
+      <p class="muted">
+        Pilih layout, ambil foto (auto countdown), edit posisi/ukuran/rotasi, lalu download JPG dengan watermark Motion-US.
+      </p>
+    </header>
+
+    <!-- STEP 1 -->
+    <section class="step active" id="step1">
+      <h2>Langkah 1 — Pilih Layout</h2>
+      <div class="layout-grid">
+        <button class="layout-card" data-layout="2row" data-count="2">
+          <div class="layout-visual layout-2row"></div>
+          <div class="layout-title">2 Foto (Baris)</div>
+        </button>
+
+        <button class="layout-card selected" data-layout="3row" data-count="3">
+          <div class="layout-visual layout-3row"></div>
+          <div class="layout-title">3 Foto (Baris)</div>
+        </button>
+
+        <button class="layout-card" data-layout="4grid" data-count="4">
+          <div class="layout-visual layout-4grid"></div>
+          <div class="layout-title">4 Foto (Baris)</div>
+        </button>
+
+        <button class="layout-card" data-layout="5mix" data-count="5">
+          <div class="layout-visual layout-5mix"></div>
+          <div class="layout-title">5 Foto (Baris)</div>
+        </button>
+
+        <button class="layout-card" data-layout="6grid" data-count="6">
+          <div class="layout-visual layout-6grid"></div>
+          <div class="layout-title">6 Foto (Baris)</div>
+        </button>
+      </div>
+      <div class="step-actions">
+        <button id="goStep2" class="btn">Lanjut ke Kamera →</button>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="step" id="step2">
+      <h2>Langkah 2 — Ambil Foto</h2>
+      <p class="muted">Tekan "Ambil Foto". Akan ada countdown 3 detik.</p>
+
+      <div class="cam-area">
+        <div class="live-box">
+          <video id="video" autoplay playsinline></video>
+          <div id="countdown" class="countdown hidden">3</div>
+        </div>
+        <div class="cam-side">
+          <div class="captured-grid" id="thumbs"></div>
+          <div class="cam-actions">
+            <button id="btnCapture" class="btn">📷 Ambil Foto</button>
+            <button id="btnResetCap" class="btn secondary">🔄 Ulangi Terakhir</button>
+          </div>
+          <div class="muted small" id="capInfo">0 foto diambil</div>
+          <button id="btnMirror" class="btn secondary full">🪞 Mirror Kamera</button>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button id="backTo1" class="btn secondary">← Kembali</button>
+        <button id="goStep3" class="btn ok" disabled>→ Lanjut Edit</button>
+      </div>
+
+      <div id="filterPanel" style="margin-top:1rem;"></div>
+      <canvas id="hiddenCanvas" width="1080" height="1080" hidden></canvas>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="step" id="step3">
+      <h2>Langkah 3 — Edit & Sesuaikan</h2>
+
+      <div class="editor">
+        <aside class="panel-left">
+          <div class="panel-group">
+            <h3>Kontrol Objek</h3>
+
+            <div class="row">
+              <label>Jenis:</label>
+              <select id="selTarget">
+                <option value="p0">Foto 1</option>
+              </select>
+            </div>
+
+            <div class="control-section">
+              <label>Posisi:</label>
+              <div class="joystick-control">
+                <button class="joy-btn joy-up" id="moveUp">▲</button>
+                <div class="joy-middle">
+                  <button class="joy-btn joy-left" id="moveLeft">◀</button>
+                  <button class="joy-btn joy-center" id="btnCenter">⊙</button>
+                  <button class="joy-btn joy-right" id="moveRight">▶</button>
+                </div>
+                <button class="joy-btn joy-down" id="moveDown">▼</button>
+              </div>
+            </div>
+
+            <div class="control-section">
+              <label>Skala: <span id="scaleVal">100%</span></label>
+              <div class="control-with-buttons">
+                <button class="ctrl-btn" id="scaleDown">−</button>
+                <input id="scale" type="range" min="10" max="300" value="100">
+                <button class="ctrl-btn" id="scaleUp">+</button>
+              </div>
+            </div>
+
+            <div class="control-section">
+              <label>Rotasi: <span id="rotVal">0°</span></label>
+              <div class="control-with-buttons">
+                <button class="ctrl-btn" id="rotateLeft">−</button>
+                <input id="rotate" type="range" min="-180" max="180" value="0">
+                <button class="ctrl-btn" id="rotateRight">+</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <button id="btnDelSticker" class="btn danger full">🗑️ Hapus Sticker</button>
+            </div>
+
+            <div class="control-section">
+              <label>Layer Order:</label>
+              <div class="layer-control">
+                <button class="layer-btn" id="btnBringFront"><span>Ke Depan</span></button>
+                <button class="layer-btn" id="btnSendBack"><span>Ke Belakang</span></button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="stage-wrap">
+          <canvas id="stage" width="1080" height="1080"></canvas>
+          <div class="wm">Photobooth</div>
+        </div>
+
+        <aside class="panel-right">
+          <div class="panel-group">
+            <h3>Frame Width 1080 Height 1080 x Jumlah Foto</h3>
+            <div id="framePreset" class="thumb-grid"></div>
+            <div class="row">
+              <button id="btnFrameUpload" class="btn secondary">📤 Upload Frame</button>
+            </div>
+            <div class="row" style="margin-top:6px">
+              <button id="btnFrameRemove" class="btn danger full">Hapus Frame</button>
+            </div>
+            <input type="file" id="uploadFrame" accept="image/png,image/jpeg" hidden>
+          </div>
+
+          <div class="panel-group">
+            <h3>Aksesoris</h3>
+            <div id="stickerPreset" class="thumb-grid"></div>
+            <div class="row">
+              <button id="btnStickerUpload" class="btn secondary full">📤 Upload Aksesoris</button>
+            </div>
+            <input type="file" id="uploadSticker" accept="image/png,image/jpeg" hidden>
+          </div>
+
+          <div class="panel-group">
+            <button id="btnDownloadJpg" class="btn ok full">💾 Download JPG</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="step-actions">
+        <button id="backTo2" class="btn secondary">← Kembali Ambil Foto</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Lib eksternal -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- Script halaman (pastikan path import Filters di dalamnya: ../../assets/js/filters.js) -->
+  <script type="module" src="./js/photo.js"></script>
+</body>
+</html>

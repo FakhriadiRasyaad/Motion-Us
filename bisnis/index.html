@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Motion-US Home</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/bisnis/style.css" />
+
+  <!-- Supabase UMD + init -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script type="module" src="../assets/js/supabaseClient.js"></script>
+
+  <!-- Anti-kedip sebelum lolos gate -->
+  <style>
+    html { background:#0b1020; }
+    body { visibility:hidden; }
+    body.ready { visibility:visible; }
+  </style>
+</head>
+<body class="page-home">
+  <!-- Gate (harus sebelum script lain) -->
+  <script type="module" src="./js/gate-bisnis.js"></script>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Selamat Datang di <span id="welcomeTarget">ctrl+alt+w to change</span></h1>
+    <p>Pilih fitur yang kamu inginkan, dan mulai berkreasi!</p>
+  </header>
+
+  <!-- Feature cards -->
+  <main class="features">
+    <a class="card" id="btnPhoto">
+      <div class="icon">📸</div>
+      <h3>Foto Motion</h3>
+      <p>Ambil foto dengan frame otomatis dan hasilkan foto cute.</p>
+    </a>
+
+    <a class="card" id="btnVideo">
+      <div class="icon">🎥</div>
+      <h3>Motion Video</h3>
+      <p>Buat video motion keren, cocok untuk konten berikutnya.</p>
+    </a>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- Logic welcome + navigasi -->
+  <script type="module" src="./js/home.js"></script>
+</body>
+</html>

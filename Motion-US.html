@@ -10,6 +10,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <!-- Init client (window.sb) -->
   <script type="module" src="assets/js/supabaseClient.js"></script>
+
+  <style>
+    /* Gaya kecil untuk tombol "bisnis" */
+    .bisnis-strip { display:flex; justify-content:center; margin:10px 0 -10px; }
+    .btn-bisnis {
+      display:inline-block; font-size:12px; line-height:1; padding:8px 10px;
+      border-radius:999px; border:1px solid #1f2536; background:#0f172a; color:#e5e7eb;
+      cursor:pointer; opacity:.9; transition:transform .08s ease, opacity .2s;
+    }
+    .btn-bisnis:hover { transform:translateY(-1px); opacity:1; }
+    .btn-bisnis[hidden] { display:none !important; }
+  </style>
 </head>
 <body class="page-home">
 
@@ -43,6 +55,11 @@
     <h1>Selamat Datang di <span>Motion-US</span></h1>
     <p>Pilih fitur yang kamu inginkan, gunakan tokenmu, dan mulai berkreasi!</p>
   </header>
+
+  <!-- Tombol kecil "bisnis" (hanya muncul untuk role bisnis/admin/superadmin) -->
+  <div class="bisnis-strip">
+    <button id="btnBisnis" class="btn-bisnis" hidden>BISNIS</button>
+  </div>
 
   <!-- Feature cards -->
   <main class="features">
@@ -83,6 +100,7 @@
   <!-- Script khusus halaman Home (navigasi saja) -->
   <script type="module" src="assets/js/pages/home.js"></script>
   <script src="assets/js/nav.js"></script>
-  
+
+ 
 </body>
 </html>

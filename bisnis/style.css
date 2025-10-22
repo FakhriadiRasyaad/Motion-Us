@@ -1,0 +1,119 @@
+/* =========================================================
+   Motion-US Home
+   File: /bisnis/style.css
+   ========================================================= */
+
+   :root {
+    --bg:#0b1020;
+    --card:#121738;
+    --soft:#1a2150;
+    --ink:#e8edff;
+    --muted:#b8c1ff;
+  
+    --accent:#8b7bff;
+    --accent-2:#6ee7b7;
+    --ok:#22c55e;
+    --shadow:0 10px 30px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.03) inset;
+    --radius:18px;
+    --radius-2:24px;
+  }
+  
+  /* ---------- Base ---------- */
+  html,body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    line-height:1.5;
+    margin:0;
+    min-height:100%;
+  }
+  a{text-decoration:none;color:inherit;}
+  img{max-width:100%;display:block;}
+  .hidden{display:none!important;}
+  .muted{color:var(--muted);}
+  body.page-home{display:flex;flex-direction:column;min-height:100vh;}
+  
+  /* ---------- Hero ---------- */
+  .hero{
+    text-align:center;
+    margin-top:80px;
+    padding:0 16px;
+  }
+  .hero h1{
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 8px;
+    background:linear-gradient(90deg,#fff,#d7ddff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .hero span{
+    color:var(--accent);
+    font-weight:700;
+  }
+  .hero p{
+    color:var(--muted);
+    margin:0 auto;
+    max-width:600px;
+    font-size:1.05rem;
+  }
+  
+  /* ---------- Features ---------- */
+  .features{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+    max-width:960px;
+    margin:60px auto;
+    padding:0 20px;
+  }
+  
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-2);
+    box-shadow:var(--shadow);
+    text-align:center;
+    padding:36px 24px;
+    transition:transform .1s ease, box-shadow .25s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 30px rgba(139,123,255,.25);
+  }
+  .card:active{transform:translateY(0) scale(.98);}
+  .card .icon{
+    font-size:56px;
+    margin-bottom:16px;
+  }
+  .card h3{
+    font-size:1.4rem;
+    margin:0 0 8px;
+  }
+  .card p{
+    font-size:.95rem;
+    color:var(--muted);
+    margin:0;
+  }
+  
+  /* ---------- Footer ---------- */
+  .footer{
+    text-align:center;
+    color:var(--muted);
+    padding:20px 10px 40px;
+    font-size:.9rem;
+  }
+  
+  /* ---------- Responsive ---------- */
+  @media (max-width:600px){
+    .hero{margin-top:60px;}
+    .features{margin:40px auto;}
+    .card{padding:28px 20px;}
+    .card .icon{font-size:48px;}
+  }
+  

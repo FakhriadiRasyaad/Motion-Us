@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Video Booth Premium</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo.png">
+  <link rel="stylesheet" href="/bisnis/video.css"/>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="../assets/js/supabaseClient.js"></script>
+
+  <style>
+    html{background:#0b1020}
+    body{visibility:hidden}
+    body.ready{visibility:visible}
+  </style>
+</head>
+<body class="page-video">
+  <!-- Gate -->
+  <script type="module" src="./js/gate-bisnis.js"></script>
+
+  <main class="vid-wrap">
+    <header class="vid-head">
+      <h1>🎥 Video Booth</h1>
+    </header>
+
+    <div id="cameraBtns" class="cam-choices"></div>
+
+    <section class="vid-grid">
+      <div class="vid-left">
+        <div class="live-box">
+          <video id="live" autoplay playsinline muted></video>
+          <div id="countdown" class="countdown hidden">3</div>
+        </div>
+        <div id="timer" class="timer">Detik: 0 / 0</div>
+        <button id="backTo1" class="btn secondary">Mirror Kamera</button>
+        <div id="filterPanel" style="margin-top:1rem;"></div>
+      </div>
+
+      <aside class="vid-right">
+        <div class="controls">
+          <div class="row">
+            <button id="optA" class="btn secondary">⏱️ 10 Detik</button>
+            <button id="optB" class="btn secondary">⏱️ 20 Detik</button>
+          </div>
+          <div class="row">
+            <button id="startRec" class="btn">🎥 Mulai Rekam</button>
+            <button id="stopRec" class="btn warn" disabled>⛔ Stop</button>
+          </div>
+        </div>
+
+        <div class="frame-upload">
+          <h3>📁 Upload Frame Custom</h3>
+          <p class="muted">PNG/JPG (max 5MB), akan dioverlay ke semua foto</p>
+          <input id="frameInput" type="file" accept="image/png,image/jpeg,image/jpg" hidden>
+          <div class="frame-upload-area" id="frameUploadArea">
+            <div class="frame-upload-icon">🖼️</div>
+            <p><strong>Klik atau drag & drop</strong></p>
+            <p class="muted">PNG/JPG</p>
+          </div>
+          <img id="framePreview" class="frame-preview hidden" alt="Preview Frame">
+
+          <div class="frame-picker">
+            <div class="picker-head">
+              <span>Pilih Frame Cepat</span>
+              <button id="btnNoFrame" type="button" class="btn tiny secondary">Tanpa Frame</button>
+            </div>
+            <div id="presetFrames" class="picker-grid" aria-live="polite"></div>
+          </div>
+
+          <button id="btnFramePick" class="btn secondary" style="width:100%;">📤 Pilih Frame</button>
+        </div>
+
+        <div class="after">
+          <button id="downloadZip" class="btn secondary" disabled>📥 Download ZIP</button>
+          <button id="downloadPdf" class="btn ok" disabled>📝 Download PDF A4</button>
+          <button id="retake" class="btn secondary" disabled>🔁 Hapus & Rekam Ulang</button>
+        </div>
+
+        <div id="progressWrap" class="progress hidden">
+          <div id="progressText" class="progress-text">Memproses...</div>
+          <div id="progressBg" class="progress-bg">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <div id="status" class="note"></div>
+      </aside>
+    </section>
+
+    <section class="preview">
+      <h3>📹 Preview Rekaman</h3>
+      <video id="playback" controls class="hidden"></video>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Motion-US. All rights reserved.</p>
+  </footer>
+
+  <!-- External libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Main Video Script (tanpa token/badge/charge) -->
+  <script type="module" src="./js/video.js"></script>
+
+  <!-- Drag & Drop handler -->
+  <script>
+    const uploadArea = document.getElementById('frameUploadArea');
+    const frameInput = document.getElementById('frameInput');
+
+    uploadArea.addEventListener('click', () => frameInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#667eea';
+      uploadArea.style.background = '#f0f4ff';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '#cbd5e0';
+      uploadArea.style.background = '';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#cbd5e0';
+      uploadArea.style.background = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        frameInput.files = dt.files;
+        frameInput.dispatchEvent(new Event('change'));
+      } else {
+        alert('❌ Hanya file gambar yang diperbolehkan!');
+      }
+    });
+    frameInput.addEventListener('change', () => {
+      if (frameInput.files.length > 0) {
+        uploadArea.classList.add('has-file');
+        uploadArea.querySelector('.frame-upload-icon').textContent = '✅';
+      }
+    });
+  </script>
+</body>
+</html>
