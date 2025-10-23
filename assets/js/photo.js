@@ -245,10 +245,13 @@ goStep3Btn.addEventListener('click', async () => {
   await initEditor();
 });
 
-backTo2Btn.addEventListener('click', () => {
-  swap(step3, step2);
-  initCamera();
+backTo2Btn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  stopCamera?.();              // matikan track kamera dulu
+  window.location.href = 'Photo.html';   // atau './Photo.html'
 });
+
+
 
 // ====== Step 3: Editor ======
 let objects = [];
