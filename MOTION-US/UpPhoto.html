@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Photobooth – Motion-US</title>
+
+  <!-- Halaman ini ada di subfolder => pakai ../ ke assets -->
   <link rel="icon" type="image/png" href="../assets/img/logo.png">
-  <!-- <link rel="stylesheet" href="../assets/css/Photo.css"> -->
   <link rel="stylesheet" href="../assets/css/nav.css">
   <link rel="stylesheet" href="../assets/css/photo-upload.css">
   <link rel="stylesheet" href="../bisnis/photo.css"/>
@@ -16,13 +17,7 @@
   <nav class="navbar">
     <div class="navbar-left">
       <img src="../assets/img/logo.png" alt="Logo" class="navbar-logo" />
-      
-      <button class="hamburger" id="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
       <div class="navbar-links" id="navbarLinks">
         <a href="../Motion-US.html" class="active">Home</a>
         <a href="../About.html">About</a>
@@ -39,38 +34,34 @@
     <header class="pb-head">
       <h1>📸 Photobooth</h1>
       <p class="muted">
-        Pilih layout, ambil foto (auto countdown), edit posisi/ukuran/rotasi, lalu download JPG dengan watermark Motion-US.</p>
+        Pilih layout, upload foto, edit posisi/ukuran/rotasi, lalu download JPG dengan watermark Motion-US.
+      </p>
     </header>
 
     <!-- STEP 1: PILIH LAYOUT -->
     <section class="step active" id="step1">
       <h2>Langkah 1 — Pilih Layout</h2>
       <div class="layout-grid">
-        <!-- Layout 2 Foto -->
         <button class="layout-card" data-layout="2row" data-count="2">
           <div class="layout-visual layout-2row"></div>
           <div class="layout-title">2 Foto (Baris)</div>
         </button>
 
-        <!-- Layout 3 Foto Vertikal -->
         <button class="layout-card selected" data-layout="3row" data-count="3">
           <div class="layout-visual layout-3row"></div>
           <div class="layout-title">3 Foto (Baris)</div>
         </button>
 
-        <!-- Layout 4 Foto -->
         <button class="layout-card" data-layout="4grid" data-count="4">
           <div class="layout-visual layout-4grid"></div>
           <div class="layout-title">4 Foto (Baris)</div>
         </button>
 
-        <!-- Layout 5 Foto -->
         <button class="layout-card" data-layout="5mix" data-count="5">
           <div class="layout-visual layout-5mix"></div>
           <div class="layout-title">5 Foto (Baris)</div>
         </button>
 
-        <!-- Layout 6 Foto -->
         <button class="layout-card" data-layout="6grid" data-count="6">
           <div class="layout-visual layout-6grid"></div>
           <div class="layout-title">6 Foto (Baris)</div>
@@ -210,8 +201,10 @@
         </aside>
       </div>
 
+      <div class="step-actions">
+        <button id="backTo2" class="btn secondary">← Kembali Upload Foto</button>
+      </div>
     </section>
-
   </main>
 
   <footer class="footer">
@@ -229,11 +222,13 @@
   <!-- Badge token -->
   <script type="module" src="../assets/js/badge.js"></script>
 
-  <!-- Charge token -->
+  <!-- Charge token (opsional) -->
   <script type="module" src="../assets/js/charge-on-download.js"></script>
 
   <!-- Halaman khusus -->
   <script type="module" src="../assets/js/upphoto.js"></script>
+
+  <!-- Nav -->
   <script src="../assets/js/nav.js"></script>
 </body>
 </html>
